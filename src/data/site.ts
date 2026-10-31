@@ -5,7 +5,13 @@
  * One file to edit the brand copy, contact channels, arsenal and
  * verified record. Anything set to `null` renders as a clearly
  * marked classified placeholder instead of an invented value.
+ *
+ * Counters (operatives / operations / status split) are NOT typed in
+ * here — they are derived from src/data/team.ts and src/data/missions.ts
+ * further down so a record change updates the whole page at once.
  */
+import { operativeMeta } from './team'
+import { statusCounts } from './missions'
 
 export const brand = {
   name: 'GHOST PROTOCOL',
@@ -41,7 +47,7 @@ export const hero = {
   secondaryCta: 'EXPLORE OUR OPERATIONS',
   status: [
     { label: 'SYSTEM STATUS', value: 'ONLINE', state: 'online' as const },
-    { label: 'OPERATIVES', value: '03', state: 'neutral' as const },
+    { label: 'OPERATIVES', value: operativeMeta.count, state: 'neutral' as const },
     { label: 'SECURITY LEVEL', value: 'CLASSIFIED', state: 'alert' as const },
   ],
 }
@@ -69,10 +75,10 @@ export const about = {
     'We explore the digital world, challenge conventional thinking, participate in competitive environments and transform ambitious ideas into real solutions.',
   ],
   stats: [
-    { label: 'OPERATIVES', value: '03', note: 'CORE' },
-    { label: 'OPERATIONS', value: '03', note: 'TOTAL' },
-    { label: 'COMPLETED', value: '02', note: 'ARCHIVED' },
-    { label: 'ACTIVE', value: '01', note: 'PENDING' },
+    { label: 'OPERATIVES', value: operativeMeta.count, note: 'ACTIVE' },
+    { label: 'OPERATIONS', value: String(statusCounts.total).padStart(2, '0'), note: 'TOTAL' },
+    { label: 'COMPLETED', value: String(statusCounts.completed).padStart(2, '0'), note: 'ARCHIVED' },
+    { label: 'ACTIVE', value: String(statusCounts.active).padStart(2, '0'), note: 'LIVE' },
   ],
 }
 
@@ -191,7 +197,15 @@ export const records: RecordEntry[] = [
     year: null,
     type: 'MILESTONE',
     title: 'Operation Blackout',
-    detail: 'Next operation. Details remain classified.',
+    detail: 'Live operation. Details remain classified.',
+    verified: true,
+  },
+  {
+    id: 'record-secleaf',
+    year: null,
+    type: 'MILESTONE',
+    title: 'SECLEAF 2026',
+    detail: 'Live operation. Briefing remains classified.',
     verified: true,
   },
 ]

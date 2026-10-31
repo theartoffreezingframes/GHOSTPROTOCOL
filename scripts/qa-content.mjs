@@ -70,43 +70,106 @@ try {
     'AKSHAY RAJU OMKARAM',
     'VARUN VEERAPALLY',
     'SREEKAR KETHA',
+    'MOHAMMAD ISMAIL KHAN',
+    'SNEHITH REDDY NEMALIKONDA',
+    'DILIP KESHAV MADALA',
     'GHOST',
     'SHADOW',
     'PHANTOM',
+    'SPECTRE',
+    'CIPHER',
+    'MAVERICK',
     'THE INVISIBLE OPERATOR',
     'THE TECH MASTERMIND',
     'THE UNTRACEABLE HACKER',
+    'THE ADAPTIVE SPECIALIST',
+    'THE EMERGING FORCE',
+    'THE STRATEGIC MIND',
     'LEAD OPERATOR',
     'HACKER',
     'TECH OPERATIVE',
+    'TECHNICAL OPERATIVE',
+    'INTELLIGENCE ANALYST',
   ]
   for (const value of official) {
     check(`identity: ${value}`, visible.includes(value))
   }
-  check('operatives: exactly 03', team.operatives.length === 3, `found ${team.operatives.length}`)
+  check('operatives: exactly 06', team.operatives.length === 6, `found ${team.operatives.length}`)
+  check('operatives: 06 published', team.activeOperatives.length === 6, `found ${team.activeOperatives.length}`)
+  check('operative count derived', team.operativeMeta.count === '06')
+
+  // every profile description reproduced verbatim
+  const profiles = {
+    GHOST:
+      'Every operation begins with a vision. GHOST is the force behind the protocol — coordinating the team, navigating uncertainty and turning ambitious ideas into executable strategies. Operating behind the scenes, he brings direction, determination and a relentless drive to make the impossible possible.',
+    SHADOW:
+      'Where others see barriers, SHADOW sees entry points. A technical mind operating beyond the obvious, he approaches challenges with precision, curiosity and an instinct for finding unconventional solutions. When the system becomes unpredictable, SHADOW finds another way through.',
+    PHANTOM:
+      'Silent in approach. Precise in execution. PHANTOM represents the art of operating without unnecessary noise. With a focus on technical exploration and methodical problem-solving, he moves through complex challenges while keeping the mission in focus.',
+    SPECTRE:
+      'Adaptability is the ultimate advantage. SPECTRE quickly absorbs unfamiliar technologies, adjusts to changing situations and brings versatility to the operation. When the mission introduces a new challenge, SPECTRE is ready to learn, adapt and execute.',
+    CIPHER:
+      'Every specialist begins with a first breakthrough. CIPHER represents the next wave of the protocol — curious, experimental and driven by continuous learning. Each challenge is another opportunity to decode the unknown and evolve into something stronger.',
+    MAVERICK:
+      'Information is power. MAVERICK looks beyond the obvious, identifying patterns and connecting details others might overlook. With a natural analytical approach and the ability to learn quickly, he turns scattered information into strategic insight.',
+  }
+  for (const [codename, profile] of Object.entries(profiles)) {
+    const record = team.operatives.find((o) => o.codename === codename)
+    check(`profile: ${codename}`, record?.profile === profile, record ? '' : 'record missing')
+  }
+
+  // portraits: unique files, real bytes on disk, alt text
+  const portraitBases = team.operatives.map((o) => o.image.base)
+  check('portraits are unique', new Set(portraitBases).size === portraitBases.length)
+  check(
+    'portraits follow /media convention',
+    portraitBases.every((base) => /^\/media\/operative-[a-z]+$/.test(base)),
+  )
+  check('portraits have alt text', team.operatives.every((o) => o.image.alt && o.image.alt.length > 30))
+  const fsCheck = await import('node:fs')
+  for (const operative of team.operatives) {
+    for (const width of operative.image.widths) {
+      check(
+        `portrait file: ${operative.image.base}-${width}.webp`,
+        fsCheck.existsSync(`public${operative.image.base}-${width}.webp`),
+      )
+    }
+  }
 
   // ── mission names + statuses ─────────────────────────────────
-  check('mission 001 name', missionsData.missions[0].title === 'OPERATION ZEROSECURE 2.0')
-  check('mission 001 completed', missionsData.missions[0].status === 'COMPLETED')
-  check('mission 002 name', missionsData.missions[1].title === 'OPERATION CYBER EKATHON')
-  check('mission 002 completed', missionsData.missions[1].status === 'COMPLETED')
-  check('mission 003 name', missionsData.missions[2].title === 'OPERATION BLACKOUT')
-  check('mission 003 upcoming', missionsData.missions[2].status === 'UPCOMING')
-  check('mission count is 3', missionsData.missions.length === 3)
-  check('zeroSecure event label', missionsData.missions[0].event === 'ZeroSecure 2.0')
-  check('ekathon event label', missionsData.missions[1].event === 'Cyber Ekathon')
-  check('blackout has no invented date', missionsData.missions[2].date === null)
-  check('blackout has no invented venue', missionsData.missions[2].venue === null)
-  check('blackout has no invented summary', missionsData.missions[2].summary === null)
+  const byNum = (n) => missionsData.missions.find((m) => m.number === n)
+  check('mission 001 name', byNum('001').title === 'OPERATION ZEROSECURE 2.0')
+  check('mission 001 completed', byNum('001').status === 'COMPLETED')
+  check('mission 002 name', byNum('002').title === 'OPERATION CYBER EKATHON')
+  check('mission 002 completed', byNum('002').status === 'COMPLETED')
+  check('mission 003 name', byNum('003').title === 'OPERATION BLACKOUT')
+  check('mission 003 ongoing', byNum('003').status === 'ONGOING')
+  check('mission 004 name', byNum('004').title === 'SECLEAF 2026')
+  check('mission 004 ongoing', byNum('004').status === 'ONGOING')
+  check('mission count is 4', missionsData.missions.length === 4, `found ${missionsData.missions.length}`)
+  check('no mission left UPCOMING', missionsData.missions.every((m) => m.status !== 'UPCOMING'))
+  check('status counts completed = 2', missionsData.statusCounts.completed === 2)
+  check('status counts ongoing = 2', missionsData.statusCounts.ongoing === 2)
+  check('zeroSecure event label', byNum('001').event === 'ZeroSecure 2.0')
+  check('ekathon event label', byNum('002').event === 'Cyber Ekathon')
+  for (const n of ['003', '004']) {
+    check(`mission ${n} has no invented date`, byNum(n).date === null)
+    check(`mission ${n} has no invented venue`, byNum(n).venue === null)
+    check(`mission ${n} has no invented summary`, byNum(n).summary === null)
+    check(`mission ${n} claims no outcomes`, byNum(n).outcomes.length === 0)
+  }
+  check('secleaf image exists', fsCheck.existsSync(`public${byNum('004').image.base}-1500.webp`))
+  check('blackout is the feature tile', missionsData.featureMission.number === '003')
 
   // mission copy blocks
   for (const phrase of [
-    'THE NEXT OPERATION IS UNKNOWN.',
+    'THE OPERATION',
+    'IS LIVE.',
     'THE SYSTEM IS GOING DARK.',
-    'A NEW MISSION IS APPROACHING.',
+    'THE MISSION IS ALREADY IN MOTION.',
     'ACCESS CLASSIFIED FILE',
     'MISSION STATUS',
-    'UPCOMING',
+    'ONGOING',
     'ACCESS',
     'CLASSIFIED',
     'OPERATIVES',
@@ -134,7 +197,7 @@ try {
     'THINK DIFFERENT.',
     'BUILD FEARLESSLY.',
     'OPERATE BEYOND LIMITS.',
-    'THREE MINDS.',
+    'SIX MINDS.',
     'ONE PROTOCOL.',
     'THE MISSIONS',
     'DEFINE US.',
@@ -150,6 +213,8 @@ try {
     'PROTOCOL REMAINS ACTIVE.',
     'SEE YOU ON THE OTHER SIDE.',
     'GHOST_PROTOCOL_',
+    'SECLEAF 2026',
+    'DIFFERENT SPECIALTIES. ONE OBJECTIVE. NO IMPOSSIBLE MISSIONS.',
     'THINK BEYOND LIMITS.',
     'OPERATE IN THE SHADOWS.',
     'BUILD THE IMPOSSIBLE.',
@@ -185,6 +250,9 @@ try {
   check('no lorem ipsum', !visible.includes('LOREM IPSUM'))
   check('no dead href="#"', !/<a[^>]*href="#"|href="#"/.test(html))
   check('no invented awards copy', !visible.includes('1ST PLACE') && !visible.includes('WINNER'))
+  check('no stale THREE MINDS headline', !visible.includes('THREE MINDS.'))
+  check('no stale UPCOMING claim', !visible.includes('NEXT OPERATION · PENDING'))
+  check('no stale INCOMING OPERATION label', !visible.includes('INCOMING OPERATION'))
 
   // ── accessibility + performance hygiene ────────────────────
   const imgs = html.match(/<img[^>]*>/g) ?? []

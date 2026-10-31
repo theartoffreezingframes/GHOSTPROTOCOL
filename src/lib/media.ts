@@ -26,21 +26,39 @@ export const MEDIA = {
   },
   operativeGhost: {
     base: '/media/operative-ghost',
-    widths: [640, 1000, 1400],
+    widths: [420, 700, 1000],
     ratio: 4 / 5,
-    alt: 'Anonymous hooded silhouette outlined by a thin neon-green rim light on a black background',
+    alt: 'Lead operative GHOST in a dark command centre, face half in shadow with green intelligence displays behind him',
   },
   operativeShadow: {
     base: '/media/operative-shadow',
-    widths: [640, 1000, 1400],
+    widths: [420, 700, 1000],
     ratio: 4 / 5,
-    alt: 'Anonymous hooded figure at a dark workstation, face hidden in shadow with green circuit light',
+    alt: 'Technical specialist SHADOW lit by neon green, sitting at a dark workstation with encrypted code interfaces behind him',
   },
   operativePhantom: {
     base: '/media/operative-phantom',
-    widths: [640, 1000, 1400],
+    widths: [420, 700, 1000],
     ratio: 4 / 5,
-    alt: 'Anonymous figure in profile dissolving into black mist with a faint ghosted double exposure',
+    alt: 'Stealth operative PHANTOM in profile in a dark concrete corridor, one band of green light across the face',
+  },
+  operativeSpectre: {
+    base: '/media/operative-spectre',
+    widths: [420, 700, 1000],
+    ratio: 4 / 5,
+    alt: 'Adaptable technical specialist SPECTRE in a cyber operations room, layered green holographic interfaces behind him',
+  },
+  operativeCipher: {
+    base: '/media/operative-cipher',
+    widths: [420, 700, 1000],
+    ratio: 4 / 5,
+    alt: 'Emerging operative CIPHER emerging from darkness, lit by green light with soft encrypted glyphs drifting behind',
+  },
+  operativeMaverick: {
+    base: '/media/operative-maverick',
+    widths: [420, 700, 1000],
+    ratio: 4 / 5,
+    alt: 'Intelligence analyst MAVERICK in front of holographic data maps and network graphs in a dark analysis room',
   },
   missionZeroSecure: {
     base: '/media/mission-zerosecure',
@@ -59,6 +77,12 @@ export const MEDIA = {
     widths: [900, 1500, 2100],
     ratio: 16 / 7,
     alt: 'A blacked-out server corridor fading into darkness, with one distant slit of green light',
+  },
+  missionSecleaf: {
+    base: '/media/mission-secleaf',
+    widths: [900, 1500, 2100],
+    ratio: 16 / 7,
+    alt: 'A sealed manila mission file and encrypted drive on a dark briefing table, swept by a green scanner beam',
   },
 } satisfies Record<string, MediaAsset>
 

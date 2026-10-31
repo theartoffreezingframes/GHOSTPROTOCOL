@@ -12,8 +12,8 @@ completed operations, and an encrypted file for the next one.
 
 ## Overview
 
-Ghost Protocol is a three-person cyber collective. This site is their public identity:
-who operates, what has been executed, what ships next, and how to open a channel.
+Ghost Protocol is a six-person cyber collective. This site is their public identity:
+who operates, what has been executed, what is live right now, and how to open a channel.
 It is a fully interactive React application — every button, dossier, mission record and
 navigation control works. There is no backend; all content is typed, local data.
 
@@ -92,7 +92,7 @@ No backend, database or API keys. Static output, deployable anywhere.
 │   └── site.webmanifest        PWA manifest
 ├── scripts/
 │   ├── optimize-images.mjs     raw photos → /public/media + icons + OG card
-│   └── qa-content.mjs          server-render QA: 128 content/markup assertions
+│   └── qa-content.mjs          server-render QA: 186 content/markup assertions
 └── src/
     ├── App.tsx                 page composition, boot gating, single scroll owner
     ├── index.css               design tokens, component classes, keyframes
@@ -115,8 +115,8 @@ No backend, database or API keys. Static output, deployable anywhere.
     │   ├── Blackout.tsx · Projects.tsx · Arsenal.tsx · Record.tsx · Contact.tsx
     ├── data/                   ← ALL EDITABLE CONTENT
     │   ├── site.ts             brand copy, hero, boot log, channels, arsenal, record
-    │   ├── team.ts             the three operatives
-    │   ├── missions.ts         ZeroSecure 2.0, Cyber Ekathon, BLACKOUT
+    │   ├── team.ts             the six operatives + portrait paths
+    │   ├── missions.ts         four operations, statuses, archive derivation
     │   └── projects.ts         engineering-lab bays
     └── lib/                    motion tokens, media helpers, utilities
 ```
@@ -189,21 +189,56 @@ Everything the site says lives in four typed files. No component edits required.
 ### Operatives — `src/data/team.ts`
 
 Codenames, full names, designations and roles are **official** and must keep their
-spelling. Each operative also accepts:
+spelling. Each record also carries:
 
 ```ts
-socials: []                      // e.g. { platform: 'github', href: 'https://…', label: 'GitHub' }
-skills:  []                      // technologies that operative actually uses
-image:   MEDIA.operativeGhost    // see "Images" below
+profile:       '…'               // long-form dossier narrative (creative character copy)
+brief:         '…'               // one-line brief on the card face
+capabilities:  ['…']             // character-profile bullets inside the dossier
+image:         MEDIA.operativeGhost   // portrait — see "Images" below
+socials:       []                // real destinations only
+skills:        []                // technologies that operative actually uses
+published:     true              // false withholds the record without deleting it
 ```
+
+**Nothing about the count is hardcoded.** `activeOperatives` filters on `published`,
+and `operativeMeta` derives the clearance counter, the `SIX MINDS. / ONE PROTOCOL.`
+headline numeral and the support line from that filtered array. Add a seventh record
+and the grid, the counter and the headline all follow.
+
+The `profile` copy is public-facing character material for the site — it is not a claim
+of verified professional experience, qualifications or achievements, and the section
+footnote says so on the page.
 
 Empty arrays render as `NOT ON RECORD` / `NO PUBLIC CHANNEL ON FILE` — never a
 placeholder account.
 
 ### Operations — `src/data/missions.ts`
 
-Statuses are fixed: `ZEROSECURE 2.0` and `CYBER EKATHON` are **COMPLETED**, `BLACKOUT`
-is **UPCOMING**. Narrative fields start as `null` and render an explicit
+The archive holds four records:
+
+| # | Mission | Status |
+| --- | --- | --- |
+| 001 | OPERATION ZEROSECURE 2.0 | COMPLETED |
+| 002 | OPERATION CYBER EKATHON | COMPLETED |
+| 003 | OPERATION BLACKOUT | ONGOING |
+| 004 | SECLEAF 2026 | ONGOING |
+
+Change a `status` and everything follows — the badge, the colour tone, the telemetry
+rows, the `ARCHIVE // 02 COMPLETE · 02 LIVE` counter and the section note are all
+derived:
+
+```ts
+statusDisplay: Record<MissionStatus, { label; tone; note; active }>
+statusCounts  = { completed, ongoing, upcoming, total, active }
+archive       = missions.filter(m => m.published !== false)
+featureMission = archive.find(m => m.feature)   // current: BLACKOUT
+archiveRows   = the remaining records
+```
+
+`feature: true` marks the record that renders as the full-bleed classified centrepiece;
+everything else renders as an archive row that shifts to the live/briefing treatment
+when its status is active. Narrative fields start as `null` and render an explicit
 `[ ENCRYPTED · AWAITING SUPPLY ]` marker:
 
 ```ts
@@ -242,7 +277,9 @@ entries and the closing sequence.
 
 ### Images
 
-Sources live in `src/assets/raw/` (git-ignored). Replace a file under the same name, then:
+Operative portraits are `operative-<codename>.jpg` and mission plates are
+`mission-<name>.jpg`, all 4:5 or 16:7 sources. Sources live in `src/assets/raw/`
+(git-ignored). Replace a file under the same name, then:
 
 ```bash
 npm run optimize:images
@@ -289,16 +326,25 @@ element jumped past by a fast scroll may never intersect at all. Therefore:
 npm run qa
 ```
 
-Server-renders every section and asserts 128 requirements: official identities, mission
-names and statuses, required copy, forbidden strings (including `BIDBOSS`), absence of
-invented socials/awards/dates, `alt`/lazy/dimension hygiene, manifest validity, and SEO
-metadata.
+Server-renders every section and asserts 186 requirements: all six identities, the six
+profile descriptions reproduced verbatim, unique portrait files present on disk, the four
+missions with their exact statuses, required copy, forbidden strings (including
+`BIDBOSS`), absence of invented socials/awards/dates, `alt`/lazy/dimension hygiene,
+manifest validity, and SEO metadata.
 
 ---
 
 ## Content integrity
 
-This build contains **no invented** photographs of members, qualifications,
-certifications, awards, rankings, event dates, venues, objectives, results, email
-addresses or social profiles. Unknown values are labelled as unknown. Add real details
-to the data files and the site surfaces them — nothing else needs to change.
+This build contains **no invented** qualifications, certifications, awards, rankings,
+event dates, venues, objectives, results, email addresses or social profiles. Unknown
+values are labelled as unknown. Add real details to the data files and the site surfaces
+them — nothing else needs to change.
+
+Operative portraits are **original AI-generated illustrations**, not photographs of the
+people named, and the section footnote says so on the page. They were produced for this
+site in one shared cinematic language (dark command environments, neon-green rim light,
+black tactical outerwear) with no real-person likeness, no film branding and no external
+image dependencies — every file is served locally from `public/media/`. The `profile`
+narrative on each dossier is public-facing character copy, not a record of verified
+experience.

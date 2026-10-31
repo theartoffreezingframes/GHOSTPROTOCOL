@@ -22,14 +22,21 @@ const grade = (img) =>
     .linear(1.06, -6) // gentle contrast curve
     .sharpen({ sigma: 0.6 })
 
+/** Portrait grid is a 3-up on desktop, so 1000px covers a 2× DPR laptop card. */
+const PORTRAIT_WIDTHS = [420, 700, 1000]
+
 const jobs = [
   { file: 'hero.jpg', name: 'hero', ratio: 16 / 9, widths: [960, 1600, 2200] },
-  { file: 'operative-ghost.jpg', name: 'operative-ghost', ratio: 4 / 5, widths: [640, 1000, 1400] },
-  { file: 'operative-shadow.jpg', name: 'operative-shadow', ratio: 4 / 5, widths: [640, 1000, 1400] },
-  { file: 'operative-phantom.jpg', name: 'operative-phantom', ratio: 4 / 5, widths: [640, 1000, 1400] },
+  { file: 'operative-ghost.jpg', name: 'operative-ghost', ratio: 4 / 5, widths: PORTRAIT_WIDTHS },
+  { file: 'operative-shadow.jpg', name: 'operative-shadow', ratio: 4 / 5, widths: PORTRAIT_WIDTHS },
+  { file: 'operative-phantom.jpg', name: 'operative-phantom', ratio: 4 / 5, widths: PORTRAIT_WIDTHS },
+  { file: 'operative-spectre.jpg', name: 'operative-spectre', ratio: 4 / 5, widths: PORTRAIT_WIDTHS },
+  { file: 'operative-cipher.jpg', name: 'operative-cipher', ratio: 4 / 5, widths: PORTRAIT_WIDTHS },
+  { file: 'operative-maverick.jpg', name: 'operative-maverick', ratio: 4 / 5, widths: PORTRAIT_WIDTHS },
   { file: 'mission-zerosecure.jpg', name: 'mission-zerosecure', ratio: 3 / 2, widths: [900, 1400, 1900] },
   { file: 'mission-cyber-ekathon.jpg', name: 'mission-cyber-ekathon', ratio: 3 / 2, widths: [900, 1400, 1900] },
   { file: 'mission-blackout.jpg', name: 'mission-blackout', ratio: 16 / 7, widths: [900, 1500, 2100] },
+  { file: 'mission-secleaf.jpg', name: 'mission-secleaf', ratio: 16 / 7, widths: [900, 1500, 2100] },
 ]
 
 async function run() {

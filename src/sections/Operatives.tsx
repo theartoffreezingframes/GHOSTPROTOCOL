@@ -10,7 +10,7 @@ import {
 } from 'motion/react'
 import { ArrowUpRight, Crosshair, Lock, Plus, ScanFace } from 'lucide-react'
 
-import { operatives, operativeMeta, type Operative } from '../data/team'
+import { activeOperatives, operativeMeta, type Operative } from '../data/team'
 import { imageFallback, imageSrcSet } from '../lib/media'
 import { EASE_OUT_EXPO } from '../lib/motion'
 import { cn } from '../lib/utils'
@@ -18,6 +18,25 @@ import { Reveal } from '../components/Reveal'
 import { SectionHeading } from '../components/SectionHeading'
 import { HudFrame } from '../components/HudFrame'
 import { StatusPill } from '../components/StatusPill'
+
+const SIGNATURE_LABEL: Record<Operative['signature'], string> = {
+  command: 'COMMAND',
+  intelligence: 'INTEL',
+  stealth: 'STEALTH',
+  adaptive: 'ADAPT',
+  emerging: 'EMERGING',
+  analysis: 'ANALYSIS',
+}
+
+/** Per-signature image grade — keeps six portraits feeling like one shoot. */
+const SIGNATURE_TREATMENT: Record<Operative['signature'], string> = {
+  command: 'contrast-[1.06] saturate-[0.9] grayscale-[25%]',
+  intelligence: 'contrast-[1.02] saturate-[1.05] grayscale-[30%]',
+  stealth: 'brightness-[0.95] contrast-[1.08] grayscale-[35%]',
+  adaptive: 'contrast-[1.03] saturate-[0.98] grayscale-[28%]',
+  emerging: 'brightness-[1.02] contrast-[1.04] grayscale-[30%]',
+  analysis: 'contrast-[1.05] saturate-[0.95] grayscale-[27%]',
+}
 
 const SOCIAL_ICON: Record<string, string> = {
   github: 'GH',
@@ -44,8 +63,8 @@ export function Operatives() {
         <SectionHeading
           id="operatives-heading"
           index="02"
-          label="OPERATIVE DATABASE"
-          lines={['THREE MINDS.', 'ONE PROTOCOL.']}
+          label={operativeMeta.label}
+          lines={operativeMeta.heading}
           aside={
             <span className="font-tech ml-auto hidden items-center gap-2 text-[0.7rem] tracking-[0.22em] text-mute/70 md:flex">
               <Lock size={9} aria-hidden="true" />
@@ -54,12 +73,16 @@ export function Operatives() {
           }
         >
           <Reveal delay={0.2}>
-            <p className="text-[0.95rem] leading-relaxed text-mute">{operativeMeta.note}</p>
+            <p className="font-tech text-[0.78rem] leading-relaxed tracking-[0.14em] text-neon/80">
+              {operativeMeta.support}
+            </p>
+            <p className="mt-3 max-w-xl text-[0.95rem] leading-relaxed text-mute">{operativeMeta.note}</p>
           </Reveal>
         </SectionHeading>
 
-        <div className="mt-14 grid grid-cols-1 gap-5 sm:mt-20 sm:gap-6 lg:grid-cols-3">
-          {operatives.map((operative, index) => (
+        {/* 1 → 2 → 3 up: six records read cleanly at every width */}
+        <div className="mt-14 grid grid-cols-1 gap-5 sm:mt-20 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
+          {activeOperatives.map((operative, index) => (
             <OperativeCard key={operative.number} operative={operative} index={index} />
           ))}
         </div>
@@ -67,7 +90,7 @@ export function Operatives() {
         <Reveal delay={0.15} className="mt-10 flex items-center gap-3 border-t border-line-soft pt-6">
           <ScanFace size={13} className="shrink-0 text-neon/60" aria-hidden="true" />
           <p className="font-tech text-[0.7rem] leading-relaxed tracking-[0.18em] text-mute/70">
-            IDENTITIES VERIFIED // PERSONAL CHANNELS AND TECHNICAL SKILLS APPEAR HERE ONCE SUPPLIED.
+            {operativeMeta.dossierNote}
           </p>
         </Reveal>
       </div>
@@ -90,11 +113,7 @@ function OperativeCard({ operative, index }: { operative: Operative; index: numb
   const spotlightY = useTransform(my, (v) => `${(v * 100).toFixed(2)}%`)
   const spotlight = useMotionTemplate`radial-gradient(420px circle at ${spotlightX} ${spotlightY}, rgba(57,255,20,0.14), transparent 62%)`
 
-  const treatment = {
-    command: 'contrast-[1.06] saturate-[0.9] grayscale-[25%]',
-    intelligence: 'contrast-[1.02] saturate-[1.05] grayscale-[30%]',
-    stealth: 'brightness-[0.92] contrast-[1.08] grayscale-[45%]',
-  }[operative.signature]
+  const treatment = SIGNATURE_TREATMENT[operative.signature]
 
   const onPointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
     if (reduce || event.pointerType === 'touch') return
@@ -238,6 +257,16 @@ function OperativeCard({ operative, index }: { operative: Operative; index: numb
                   <p className="font-tech mb-2 text-[0.66rem] tracking-[0.22em] text-neon/70">PROFILE</p>
                   <p className="text-[0.8rem] leading-relaxed text-mute">{operative.profile}</p>
 
+                  <p className="font-tech mb-2 mt-4 text-[0.66rem] tracking-[0.22em] text-neon/70">CHARACTER PROFILE</p>
+                  <ul className="space-y-1.5">
+                    {operative.capabilities.map((capability) => (
+                      <li key={capability} className="flex items-start gap-2 text-[0.78rem] leading-snug text-mute">
+                        <span className="mt-[6px] h-1 w-1 shrink-0 rounded-full bg-neon/60" aria-hidden="true" />
+                        {capability}
+                      </li>
+                    ))}
+                  </ul>
+
                   <p className="font-tech mb-2 mt-4 text-[0.66rem] tracking-[0.22em] text-neon/70">TECHNICAL SKILLS</p>
                   {operative.skills.length > 0 ? (
                     <ul className="flex flex-wrap gap-1.5">
@@ -314,7 +343,7 @@ function OperativeCard({ operative, index }: { operative: Operative; index: numb
       <div className="pointer-events-none absolute -top-3 right-3 z-40 flex items-center gap-1.5 opacity-0 transition-opacity duration-500 group-hover:opacity-100">
         <Crosshair size={10} className="text-neon" aria-hidden="true" />
         <span className="font-tech text-[0.7rem] tracking-[0.2em] text-neon/80">
-          {operative.signature === 'command' ? 'COMMAND' : operative.signature === 'intelligence' ? 'INTEL' : 'STEALTH'}
+          {SIGNATURE_LABEL[operative.signature]}
         </span>
       </div>
     </motion.article>

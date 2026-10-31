@@ -8,7 +8,7 @@ import {
 } from 'motion/react'
 import { AlertTriangle, Fingerprint, Lock, Radio, X } from 'lucide-react'
 
-import { blackoutCopy, type Mission } from '../data/missions'
+import { blackoutCopy, statusDisplay, type Mission } from '../data/missions'
 import { imageFallback, imageSrcSet } from '../lib/media'
 import { EASE_OUT_EXPO } from '../lib/motion'
 import { cn } from '../lib/utils'
@@ -19,12 +19,17 @@ import { MaskedLines } from '../components/MaskedLines'
 import { DecodeLabel } from '../components/DecodeLabel'
 
 /**
- * OPERATION BLACKOUT — the next, unknown mission.
+ * OPERATION BLACKOUT — the live, classified mission.
  * A near-black classified file: glitching typography, signal
  * interference, warning telemetry and an encrypted-file reveal.
+ *
+ * Every status label comes from the mission record, so flipping
+ * `status` in src/data/missions.ts re-labels the whole tile.
  */
 export function BlackoutMission({ mission }: { mission: Mission }) {
   const reduce = useReducedMotion()
+  const status = statusDisplay[mission.status]
+  const statusRows = blackoutCopy.status(mission)
   const [decrypted, setDecrypted] = useState(false)
   const [granted, setGranted] = useState(false)
   const sectionRef = useRef<HTMLDivElement>(null)
@@ -153,13 +158,13 @@ export function BlackoutMission({ mission }: { mission: Mission }) {
               <span className="absolute inline-flex h-full w-full rounded-full bg-neon animate-pulse-dot" />
             </span>
             <span className="font-tech text-[0.66rem] tracking-[0.24em] text-neon sm:text-[0.7rem]">
-              INCOMING OPERATION
+              {status.active ? 'ACTIVE OPERATION' : 'INCOMING OPERATION'}
             </span>
           </div>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
             <span className="font-tech flex items-center gap-1.5 text-[0.7rem] tracking-[0.18em] text-mute/80 sm:text-[0.66rem]">
               <Radio size={9} aria-hidden="true" />
-              SIGNAL LOST · RECONNECTING
+              {status.active ? 'SIGNAL OPEN · LIVE FEED' : 'SIGNAL LOST · RECONNECTING'}
             </span>
             <span className="font-tech hidden text-[0.7rem] tracking-[0.18em] text-mute/75 sm:inline">
               CH // <DecodeLabel value="0xB1A0" />
@@ -181,11 +186,13 @@ export function BlackoutMission({ mission }: { mission: Mission }) {
               viewport={{ once: true, amount: 'some', margin: '160% 0px 15% 0px' }}
               transition={{ duration: 0.8, ease: EASE_OUT_EXPO }}
             >
-              <span className="font-tech text-[0.7rem] tracking-[0.28em] text-neon">003</span>
+              <span className="font-tech text-[0.7rem] tracking-[0.28em] text-neon">{mission.number}</span>
               <span className="font-tech text-[0.7rem] tracking-[0.28em] text-mute/75" aria-hidden="true">
                 //
               </span>
-              <span className="font-tech text-[0.7rem] tracking-[0.28em] text-mute">ACTIVE FILE</span>
+              <span className="font-tech text-[0.7rem] tracking-[0.28em] text-mute">
+                {status.active ? 'ACTIVE FILE' : 'SEALED FILE'}
+              </span>
               <span className="h-px flex-1 bg-gradient-to-r from-neon/40 to-transparent" aria-hidden="true" />
             </motion.div>
 
@@ -269,7 +276,7 @@ export function BlackoutMission({ mission }: { mission: Mission }) {
                 <span className="font-tech text-[0.7rem] tracking-[0.18em] text-neon/70">LIVE</span>
               </div>
               <dl className="space-y-2.5">
-                {blackoutCopy.status.map((row) => (
+                {statusRows.map((row) => (
                   <div
                     key={row.label}
                     className="flex items-center justify-between gap-3 border-b border-neon/10 pb-2 last:border-0 last:pb-0"
@@ -278,7 +285,7 @@ export function BlackoutMission({ mission }: { mission: Mission }) {
                     <dd
                       className={cn(
                         'font-tech text-[0.7rem] tracking-[0.16em]',
-                        row.value === 'CLASSIFIED' || row.value === 'UPCOMING' ? 'text-neon' : 'text-bone/85',
+                        row.value === 'CLASSIFIED' || row.value === status.label ? 'text-neon' : 'text-bone/85',
                       )}
                     >
                       {row.value}
@@ -292,13 +299,13 @@ export function BlackoutMission({ mission }: { mission: Mission }) {
                   <span className="absolute inline-flex h-full w-full rounded-full bg-neon animate-pulse-dot" />
                 </span>
                 <span className="font-tech text-[0.7rem] tracking-[0.18em] text-mute/75">
-                  AWAITING AUTHORIZATION
+                  {status.active ? 'AWAITING AUTHORIZATION' : 'FIELD INACTIVE'}
                 </span>
               </div>
             </div>
 
             <p className="font-tech mt-4 hidden text-[0.7rem] leading-relaxed tracking-[0.16em] text-mute/60 lg:block">
-              {blackoutCopy.placeholder} // DATE, VENUE, OBJECTIVES AND RESULTS WILL BE DECLASSIFIED WHEN CONFIRMED.
+              {blackoutCopy.placeholder} // DATE, VENUE, OBJECTIVES AND RESULTS WILL BE DECLASSIFIED WHEN CLEARED.
             </p>
           </div>
         </div>
@@ -399,13 +406,13 @@ export function BlackoutMission({ mission }: { mission: Mission }) {
         {/* ── footer strip ── */}
         <div className="relative z-20 flex flex-wrap items-center justify-between gap-3 border-t border-neon/20 bg-black/70 px-4 py-2.5 sm:px-6">
           <span className="font-tech text-[0.7rem] tracking-[0.2em] text-mute/75">
-            FILE 003 // BLACKOUT
+            {blackoutCopy.strip.file(mission)}
           </span>
           <span className="font-tech text-[0.7rem] tracking-[0.2em] text-neon/70">
-            NEXT OPERATION · PENDING
+            {blackoutCopy.strip.state(mission)}
           </span>
           <span className="font-tech hidden text-[0.7rem] tracking-[0.2em] text-mute/75 sm:inline">
-            OPERATIVES ASSIGNED // 03
+            OPERATIVES ASSIGNED // {blackoutCopy.operativesAssigned(mission)}
           </span>
         </div>
       </motion.article>
