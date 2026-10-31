@@ -1,6 +1,6 @@
 import { useId, useMemo, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
-import { CheckCircle2, CircleDashed, Info, MinusCircle, Search, Shapes, X } from 'lucide-react'
+import { CheckCircle2, CircleDashed, Clock3, Info, MinusCircle, Search, Shapes, X } from 'lucide-react'
 
 import { type Operative } from '../data/team'
 import {
@@ -32,6 +32,7 @@ import { playSound } from '../lib/audio'
 
 const STATE_ICON: Record<SkillState, typeof CheckCircle2> = {
   VERIFIED: CheckCircle2,
+  'PENDING VERIFICATION': Clock3,
   'UNIT TOOLKIT': Shapes,
   'NOT SPECIFIED': CircleDashed,
   'INFORMATION UNAVAILABLE': MinusCircle,
@@ -39,6 +40,7 @@ const STATE_ICON: Record<SkillState, typeof CheckCircle2> = {
 
 const STATE_TONE: Record<SkillState, string> = {
   VERIFIED: 'text-neon',
+  'PENDING VERIFICATION': 'text-mute/55',
   'UNIT TOOLKIT': 'text-neon/55',
   'NOT SPECIFIED': 'text-mute/45',
   'INFORMATION UNAVAILABLE': 'text-mute/30',
@@ -148,14 +150,11 @@ export function SkillsMatrix() {
         {/* ── why every individual cell is a gap ── */}
         <div className="mt-8 flex flex-col gap-2 border-l border-neon/40 bg-neon/[0.035] px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="font-tech max-w-2xl text-[0.56rem] leading-relaxed tracking-[0.1em] text-bone/70">
-            <span className="text-neon">NO INDIVIDUAL SKILL IS VERIFIED YET.</span> The unit's
-            toolkit is declared, but no operative record names a tool of their own — so every
-            person-column reads UNIT TOOLKIT rather than claiming a skill. Supplying per-operative
-            tooling is the only thing that changes that.
+            <span className="text-neon">INDIVIDUAL SKILLS: PENDING VERIFICATION.</span>{' '}
+            {skillMatrixCopy.pendingBanner.replace('INDIVIDUAL SKILLS ARE PENDING VERIFICATION. ', '')}
           </p>
           <p className="font-tech shrink-0 text-[0.46rem] tracking-[0.16em] text-mute/45">
-            SOURCE: <span className="text-mute/70">src/data/team.ts</span> →{' '}
-            <span className="text-mute/70">skills: []</span>
+            STATUS // <span className="text-mute/70">AWAITING INDIVIDUAL CONFIRMATION</span>
           </p>
         </div>
 
@@ -381,7 +380,9 @@ export function SkillsMatrix() {
                                     ? 'text-neon'
                                     : cell.state === 'UNIT TOOLKIT'
                                       ? 'text-neon/50'
-                                      : 'text-mute/45',
+                                      : cell.state === 'PENDING VERIFICATION'
+                                        ? 'text-mute/55'
+                                        : 'text-mute/45',
                                 )}
                               >
                                 {cell.state === 'VERIFIED'
@@ -498,8 +499,16 @@ export function SkillsMatrix() {
         </AnimatePresence>
 
         {/* ── legend ── */}
-        <div className="mt-8 grid grid-cols-1 gap-3 border-t border-line-soft pt-5 sm:grid-cols-2 lg:grid-cols-4">
-          {(['VERIFIED', 'UNIT TOOLKIT', 'NOT SPECIFIED', 'INFORMATION UNAVAILABLE'] as SkillState[]).map((state) => {
+        <div className="mt-8 grid grid-cols-1 gap-3 border-t border-line-soft pt-5 sm:grid-cols-2 lg:grid-cols-5">
+          {(
+            [
+              'VERIFIED',
+              'PENDING VERIFICATION',
+              'UNIT TOOLKIT',
+              'NOT SPECIFIED',
+              'INFORMATION UNAVAILABLE',
+            ] as SkillState[]
+          ).map((state) => {
             const Icon = STATE_ICON[state]
             return (
               <div key={state} className="flex items-start gap-2">

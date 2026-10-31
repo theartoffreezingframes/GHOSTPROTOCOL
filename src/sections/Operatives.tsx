@@ -34,8 +34,8 @@ const SIGNATURE_LABEL: Record<Operative['signature'], string> = {
   intelligence: 'INTEL',
   stealth: 'STEALTH',
   adaptive: 'ADAPT',
-  emerging: 'EMERGING',
-  analysis: 'ANALYSIS',
+  rogue: 'ROGUE',
+  cadet: 'ROOKIE',
 }
 
 /** Per-signature image grade — keeps six portraits feeling like one shoot. */
@@ -44,8 +44,8 @@ const SIGNATURE_TREATMENT: Record<Operative['signature'], string> = {
   intelligence: 'contrast-[1.02] saturate-[1.05] grayscale-[30%]',
   stealth: 'brightness-[0.95] contrast-[1.08] grayscale-[35%]',
   adaptive: 'contrast-[1.03] saturate-[0.98] grayscale-[28%]',
-  emerging: 'brightness-[1.02] contrast-[1.04] grayscale-[30%]',
-  analysis: 'contrast-[1.05] saturate-[0.95] grayscale-[27%]',
+  rogue: 'contrast-[1.08] saturate-[1.02] grayscale-[22%]',
+  cadet: 'brightness-[1.03] contrast-[1.01] grayscale-[38%]',
 }
 
 const SOCIAL_ICON: Record<string, string> = {
@@ -407,9 +407,14 @@ function MissionHistory({ operative }: { operative: Operative }) {
           ))}
         </ul>
       ) : (
-        <p className="font-tech mt-3 border border-line-soft px-2.5 py-2 text-[0.62rem] tracking-[0.18em] text-mute/60">
-          {missionHistoryCopy.empty}
-        </p>
+        <div className="mt-3 border border-line-soft px-2.5 py-2">
+          <p className="font-tech text-[0.62rem] tracking-[0.18em] text-mute/60">
+            {missionHistoryCopy.empty}
+          </p>
+          <p className="font-tech mt-1 text-[0.5rem] leading-relaxed tracking-[0.14em] text-mute/40">
+            {missionHistoryCopy.emptyNote}
+          </p>
+        </div>
       )}
     </section>
   )

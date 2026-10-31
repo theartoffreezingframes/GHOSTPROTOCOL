@@ -12,7 +12,7 @@
 import { createServer } from 'vite'
 import { createElement as h } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { existsSync } from 'node:fs'
+import { existsSync, readFileSync, readdirSync } from 'node:fs'
 
 const server = await createServer({
   server: { middlewareMode: true },
@@ -84,19 +84,19 @@ try {
     'SHADOW',
     'PHANTOM',
     'SPECTRE',
-    'CIPHER',
-    'MAVERICK',
+    'ROGUE',
+    'CADET',
     'THE INVISIBLE OPERATOR',
     'THE TECH MASTERMIND',
     'THE UNTRACEABLE HACKER',
     'THE ADAPTIVE SPECIALIST',
-    'THE EMERGING FORCE',
-    'THE STRATEGIC MIND',
+    'THE GHOST PROTOCOL OPERATIVE',
+    'THE ROOKIE OPERATIVE',
     'LEAD OPERATOR',
     'HACKER',
     'TECH OPERATIVE',
     'TECHNICAL OPERATIVE',
-    'INTELLIGENCE ANALYST',
+    'TRAINEE',
   ]
   for (const value of official) {
     check(`identity: ${value}`, visible.includes(value))
@@ -115,10 +115,6 @@ try {
       'Silent in approach. Precise in execution. PHANTOM represents the art of operating without unnecessary noise. With a focus on technical exploration and methodical problem-solving, he moves through complex challenges while keeping the mission in focus.',
     SPECTRE:
       'Adaptability is the ultimate advantage. SPECTRE quickly absorbs unfamiliar technologies, adjusts to changing situations and brings versatility to the operation. When the mission introduces a new challenge, SPECTRE is ready to learn, adapt and execute.',
-    CIPHER:
-      'Every specialist begins with a first breakthrough. CIPHER represents the next wave of the protocol — curious, experimental and driven by continuous learning. Each challenge is another opportunity to decode the unknown and evolve into something stronger.',
-    MAVERICK:
-      'Information is power. MAVERICK looks beyond the obvious, identifying patterns and connecting details others might overlook. With a natural analytical approach and the ability to learn quickly, he turns scattered information into strategic insight.',
   }
   for (const [codename, profile] of Object.entries(profiles)) {
     const record = team.operatives.find((o) => o.codename === codename)
@@ -159,9 +155,9 @@ try {
     GHOST: ['zerosecure-2', 'cyber-ekathon', 'blackout', 'secleaf-2026'],
     SHADOW: ['zerosecure-2', 'cyber-ekathon', 'secleaf-2026'],
     PHANTOM: ['zerosecure-2', 'secleaf-2026'],
-    SPECTRE: ['cyber-ekathon', 'secleaf-2026'],
-    CIPHER: ['secleaf-2026'],
-    MAVERICK: ['secleaf-2026'],
+    SPECTRE: ['cyber-ekathon'],
+    ROGUE: ['secleaf-2026'],
+    CADET: [],
   }
   for (const [codename, expected] of Object.entries(matrix)) {
     const record = team.operatives.find((o) => o.codename === codename)
@@ -186,9 +182,23 @@ try {
     'solo flag resolves for GHOST only',
     team.operatives.filter((o) => team.isSoloAssignment(o, 'blackout')).map((o) => o.codename).join(',') === 'GHOST',
   )
-  // SECLEAF 2026 is on all six
-  const secleafHolders = team.operatives.filter((o) => o.missions.includes('secleaf-2026'))
-  check('secleaf 2026 on all six operatives', secleafHolders.length === 6, `found ${secleafHolders.length}`)
+  // SECLEAF 2026 — exact roster, and SPECTRE must be absent from it.
+  const secleafHolders = team.operatives
+    .filter((o) => o.missions.includes('secleaf-2026'))
+    .map((o) => o.codename)
+  check(
+    'secleaf 2026 roster is GHOST, SHADOW, PHANTOM, ROGUE',
+    JSON.stringify(secleafHolders) === JSON.stringify(['GHOST', 'SHADOW', 'PHANTOM', 'ROGUE']),
+    secleafHolders.join(','),
+  )
+  check('SPECTRE removed from SECLEAF 2026', !secleafHolders.includes('SPECTRE'))
+  check('ROGUE participates in SECLEAF 2026', secleafHolders.includes('ROGUE'))
+  check(
+    'CADET has no mission assignments',
+    team.operatives.find((o) => o.codename === 'CADET')?.missions.length === 0,
+  )
+  check('SPECTRE holds CYBER EKATHON and nothing else',
+    JSON.stringify(team.operatives.find((o) => o.codename === 'SPECTRE')?.missions) === '["cyber-ekathon"]')
   // every mission id is real and unique
   check('mission ids unique', new Set(missionsData.missions.map((m) => m.id)).size === 4)
   check(
@@ -263,7 +273,17 @@ try {
   check('stats: 2 ongoing', st.ongoing === 2, String(st.ongoing))
   check('stats: 2 active operations', st.activeOperations === 2, String(st.activeOperations))
   check('stats: 2 archived operations', st.archivedOperations === 2, String(st.archivedOperations))
-  check('stats: 13 assignments', st.assignments === 13, String(st.assignments))
+  // Total assignments are derived, and must equal the itemized table below.
+  // NOTE: the brief states "exactly 10", but its own participation table
+  // sums to 11 (4+3+2+1+1+0). The table is implemented exactly; this
+  // assertion pins the real total so it can never drift silently.
+  check('stats: 11 assignments', st.assignments === 11, String(st.assignments))
+  check(
+    'stats: assignments equal the itemized participation table',
+    st.assignments ===
+      ['zerosecure-2', 'cyber-ekathon', 'blackout', 'secleaf-2026'].length +
+        3 + 2 + 1 + 1 + 0,
+  )
   check('stats: 1 solo operation', st.soloOperations === 1, String(st.soloOperations))
 
   // ── network map derives from the same data ───────────────────
@@ -341,7 +361,7 @@ try {
   // ── command palette source data ──────────────────────────────
   // The palette builds its index from these exact arrays; assert the
   // index can reach every required record.
-  for (const codename of ['GHOST', 'SHADOW', 'PHANTOM', 'SPECTRE', 'CIPHER', 'MAVERICK']) {
+  for (const codename of ['GHOST', 'SHADOW', 'PHANTOM', 'SPECTRE', 'ROGUE', 'CADET']) {
     check(`palette target: operative ${codename}`, team.activeOperatives.some((o) => o.codename === codename))
   }
   for (const id of ['zerosecure-2', 'cyber-ekathon', 'blackout', 'secleaf-2026']) {
@@ -416,10 +436,10 @@ try {
   // States must be exactly the three sanctioned labels — no 1-5 scales,
   // percentages or proficiency tiers can sneak in as a fourth state.
   check(
-    'matrix exposes only the four sanctioned states',
-    Object.keys(skills.skillMatrixCopy.states).length === 4 &&
+    'matrix exposes only the five sanctioned states',
+    Object.keys(skills.skillMatrixCopy.states).length === 5 &&
       Object.values(skills.skillMatrixCopy.states).every((label) =>
-        ['VERIFIED', 'UNIT TOOLKIT', 'NOT SPECIFIED', 'INFO UNAVAILABLE'].includes(label),
+        ['VERIFIED', 'PENDING', 'UNIT TOOLKIT', 'NOT SPECIFIED', 'INFO UNAVAILABLE'].includes(label),
       ),
     JSON.stringify(skills.skillMatrixCopy.states),
   )
@@ -466,16 +486,16 @@ try {
     search.filterMissions({ ...search.EMPTY_FILTERS, operative: 'GHOST' }).length === 4,
   )
   check(
-    'search: operative filter CIPHER returns one',
-    search.filterMissions({ ...search.EMPTY_FILTERS, operative: 'CIPHER' }).length === 1,
+    'search: operative filter ROGUE returns one',
+    search.filterMissions({ ...search.EMPTY_FILTERS, operative: 'ROGUE' }).length === 1,
   )
   check(
     'search: combined GHOST + COMPLETED',
     search.filterMissions({ ...search.EMPTY_FILTERS, operative: 'GHOST', status: 'COMPLETED' }).length === 2,
   )
   check(
-    'search: combined CIPHER + COMPLETED is empty',
-    search.filterMissions({ ...search.EMPTY_FILTERS, operative: 'CIPHER', status: 'COMPLETED' }).length === 0,
+    'search: combined ROGUE + COMPLETED is empty',
+    search.filterMissions({ ...search.EMPTY_FILTERS, operative: 'ROGUE', status: 'COMPLETED' }).length === 0,
   )
   check(
     'search: text finds BLACKOUT by name',
@@ -483,7 +503,11 @@ try {
   )
   check(
     'search: text finds SECLEAF by operative',
-    search.filterMissions({ ...search.EMPTY_FILTERS, query: 'maverick' }).map((m) => m.id).join(',') === 'secleaf-2026',
+    search.filterMissions({ ...search.EMPTY_FILTERS, query: 'rogue' }).map((m) => m.id).join(',') === 'secleaf-2026',
+  )
+  check(
+    'search: text by removed codename matches nothing',
+    search.filterMissions({ ...search.EMPTY_FILTERS, query: 'maverick' }).length === 0,
   )
   check(
     'search: no fifth mission can be reached',
@@ -509,8 +533,8 @@ try {
     SHADOW: 'VARUN VEERAPALLY',
     PHANTOM: 'SREEKAR KETHA',
     SPECTRE: 'MOHAMMAD ISMAIL KHAN',
-    CIPHER: 'SNEHITH REDDY NEMALIKONDA',
-    MAVERICK: 'DILIP KESHAV MADALA',
+    ROGUE: 'SNEHITH REDDY NEMALIKONDA',
+    CADET: 'DILIP KESHAV MADALA',
   }
   for (const operative of team.activeOperatives) {
     check(
@@ -526,6 +550,91 @@ try {
     check(`transition copy for #${id}`, transitions.transitionFor(id).message.length > 0)
   }
   check('transition has a fallback', transitions.transitionFor('nonexistent').message.length > 0)
+
+  // ── roster update: identity, rank and participation ──────────
+  const roster = {
+    GHOST: { name: 'AKSHAY RAJU OMKARAM', designation: 'THE INVISIBLE OPERATOR', role: 'LEAD OPERATOR' },
+    SHADOW: { name: 'VARUN VEERAPALLY', designation: 'THE TECH MASTERMIND', role: 'HACKER' },
+    PHANTOM: { name: 'SREEKAR KETHA', designation: 'THE UNTRACEABLE HACKER', role: 'TECH OPERATIVE' },
+    SPECTRE: { name: 'MOHAMMAD ISMAIL KHAN', designation: 'THE ADAPTIVE SPECIALIST', role: 'TECHNICAL OPERATIVE' },
+    ROGUE: { name: 'SNEHITH REDDY NEMALIKONDA', designation: 'THE GHOST PROTOCOL OPERATIVE', role: 'TECHNICAL OPERATIVE' },
+    CADET: { name: 'DILIP KESHAV MADALA', designation: 'THE ROOKIE OPERATIVE', role: 'TRAINEE' },
+  }
+  check('roster: exactly six codenames', Object.keys(roster).length === 6)
+  for (const [codename, expected] of Object.entries(roster)) {
+    const record = team.operatives.find((o) => o.codename === codename)
+    check(`roster: ${codename} exists`, Boolean(record))
+    check(`roster: ${codename} full name`, record?.fullName === expected.name, record?.fullName)
+    check(`roster: ${codename} designation`, record?.designation === expected.designation, record?.designation)
+    check(`roster: ${codename} rank/role`, record?.role === expected.role, record?.role)
+  }
+
+  // The codenames that must no longer exist anywhere in the active roster.
+  check('roster: no CIPHER operative', !team.operatives.some((o) => o.codename === 'CIPHER'))
+  check('roster: no MAVERICK operative', !team.operatives.some((o) => o.codename === 'MAVERICK'))
+  check('roster: SPECTRE still present', team.operatives.some((o) => o.codename === 'SPECTRE'))
+
+  // ROGUE / CADET copy constraints from the brief.
+  const rogue = team.operatives.find((o) => o.codename === 'ROGUE')
+  const cadet = team.operatives.find((o) => o.codename === 'CADET')
+  check('ROGUE: profile mentions independence', /independent/i.test(rogue.profile))
+  check('ROGUE: profile mentions resourcefulness', /resourceful/i.test(rogue.profile))
+  check('ROGUE: profile mentions adaptability', /adapt/i.test(rogue.profile))
+  check('CADET: profile signals training/learning', /learning|training|start/i.test(cadet.profile))
+  check('CADET: never described as a senior/specialist', !/senior|specialist|expert|veteran/i.test(cadet.profile))
+
+  // The banned word must not appear anywhere in operative copy.
+  const operativeCopy = JSON.stringify(team.operatives)
+  check('no ELITE wording in operative data', !/\belite\b/i.test(operativeCopy))
+
+  // No invented technical claims: every skills array stays empty until
+  // the operative's own confirmed record supplies tooling.
+  for (const record of team.operatives) {
+    check(`skills pending: ${record.codename}`, Array.isArray(record.skills) && record.skills.length === 0)
+  }
+
+  // ── stale-name sweep over the active source ──────────────────
+  // Walk the files that render to the visitor and assert the retired
+  // codenames are gone. `cipher suite` in Contact.tsx is a crypto term,
+  // not an operative, so it is explicitly allow-listed.
+  const staleFiles = []
+  const walk = (dir) => {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const full = `${dir}/${entry.name}`
+      if (entry.isDirectory()) walk(full)
+      else if (/\.(ts|tsx)$/.test(entry.name)) staleFiles.push(full)
+    }
+  }
+  walk('src')
+  const offenders = []
+  for (const file of staleFiles) {
+    const text = readFileSync(file, 'utf8')
+    for (const [lineNo, line] of text.split('\n').entries()) {
+      // allow the legitimate crypto phrase
+      const cleaned = line.replace(/cipher suite/gi, '')
+      if (/\bCIPHER\b/.test(cleaned) || /\bMAVERICK\b/i.test(cleaned)) {
+        offenders.push(`${file}:${lineNo + 1}`)
+      }
+    }
+  }
+  check('no stale CIPHER/MAVERICK references in src', offenders.length === 0, offenders.slice(0, 5).join(', '))
+
+  // Portraits were renamed with the codenames, and the old files are gone.
+  check('portrait: rogue asset exists', existsSync('public/media/operative-rogue-1000.webp'))
+  check('portrait: cadet asset exists', existsSync('public/media/operative-cadet-1000.webp'))
+  check('portrait: old cipher asset removed', !existsSync('public/media/operative-cipher-1000.webp'))
+  check('portrait: old maverick asset removed', !existsSync('public/media/operative-maverick-1000.webp'))
+
+  // Identity cards must carry the updated identities.
+  const idRecords = team.operatives.map((o) => `${o.codename}|${o.fullName}|${o.role}`)
+  check(
+    'identity cards: ROGUE carries the new designation',
+    idRecords.includes('ROGUE|SNEHITH REDDY NEMALIKONDA|TECHNICAL OPERATIVE'),
+  )
+  check(
+    'identity cards: CADET carries TRAINEE rank',
+    idRecords.includes('CADET|DILIP KESHAV MADALA|TRAINEE'),
+  )
 
   // ── brand copy ───────────────────────────────────────────────
   for (const phrase of [

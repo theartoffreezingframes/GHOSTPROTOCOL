@@ -48,14 +48,14 @@ export const MEDIA = {
     ratio: 4 / 5,
     alt: 'Anonymous hooded figure in black standing in a dark cyber operations room, face a black void, green interface light across the clothing',
   },
-  operativeCipher: {
-    base: '/media/operative-cipher',
+  operativeRogue: {
+    base: '/media/operative-rogue',
     widths: [420, 700, 1000],
     ratio: 4 / 5,
     alt: 'Anonymous hooded figure in black framed from a low angle, face unseen, with fragments of green encrypted data drifting behind',
   },
-  operativeMaverick: {
-    base: '/media/operative-maverick',
+  operativeCadet: {
+    base: '/media/operative-cadet',
     widths: [420, 700, 1000],
     ratio: 4 / 5,
     alt: 'Anonymous hooded figure in black seen from behind, facing dim green intelligence maps and network graphs in a dark room',

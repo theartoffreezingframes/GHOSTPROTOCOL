@@ -35,7 +35,13 @@ export type OperativeSocial = {
 }
 
 /** Visual character treatment applied in the card. */
-export type OperativeSignature = 'command' | 'intelligence' | 'stealth' | 'adaptive' | 'emerging' | 'analysis'
+export type OperativeSignature =
+  | 'command'
+  | 'intelligence'
+  | 'stealth'
+  | 'adaptive'
+  | 'rogue'
+  | 'cadet'
 
 export type Operative = {
   /** Official operative number, zero-padded. */
@@ -58,6 +64,12 @@ export type Operative = {
   /** Optional accent (hex) — all records stay inside the sanctioned palette. */
   accent: string
   socials: OperativeSocial[]
+  /**
+   * Verified tooling for THIS operative, by tool name. Empty means nothing
+   * has been confirmed — the capability matrix renders "PENDING
+   * VERIFICATION" rather than assuming anything from rank, codename,
+   * mission participation or job description.
+   */
   skills: string[]
   signature: OperativeSignature
   /** Set false to withhold a record without deleting it. */
@@ -148,47 +160,56 @@ export const operatives: Operative[] = [
     skills: [],
     signature: 'adaptive',
     node: { x: 25, y: 70 },
-    missions: ['cyber-ekathon', 'secleaf-2026'],
+    missions: ['cyber-ekathon'],
     published: true,
   },
   {
     number: '005',
-    codename: 'CIPHER',
+    codename: 'ROGUE',
     fullName: 'SNEHITH REDDY NEMALIKONDA',
-    designation: 'THE EMERGING FORCE',
+    designation: 'THE GHOST PROTOCOL OPERATIVE',
     role: 'TECHNICAL OPERATIVE',
     profile:
-      'Every specialist begins with a first breakthrough. CIPHER represents the next wave of the protocol — curious, experimental and driven by continuous learning. Each challenge is another opportunity to decode the unknown and evolve into something stronger.',
-    brief: 'Emerging force. Decodes the unknown one challenge at a time.',
-    capabilities: ['Emerging technical talent', 'Curiosity and experimentation', 'Continuous learning and development'],
-    traits: ['CURIOSITY', 'EXPERIMENT', 'GROWTH'],
-    image: MEDIA.operativeCipher,
+      'Some operatives wait for the plan. ROGUE writes his own. Working without a net and answerable to no template, he reads a situation as it unfolds and adapts faster than it can change. Independent by instinct, resourceful under pressure and quietly certain of his own read — he takes the assignment other operatives would call impossible and treats it as a starting position.',
+    brief: 'Works without a net. Turns an impossible assignment into a starting position.',
+    capabilities: [
+      'Independent operator who works without close direction',
+      'Resourceful under pressure',
+      'Adapts to a changing situation as it unfolds',
+      'Confident enough to take on assignments others pass over',
+    ],
+    traits: ['INDEPENDENT', 'RESOURCEFUL', 'ADAPTABLE'],
+    image: MEDIA.operativeRogue,
     accent: '#39FF14',
     socials: [],
     skills: [],
-    signature: 'emerging',
+    signature: 'rogue',
     node: { x: 44, y: 74 },
     missions: ['secleaf-2026'],
     published: true,
   },
   {
     number: '006',
-    codename: 'MAVERICK',
+    codename: 'CADET',
     fullName: 'DILIP KESHAV MADALA',
-    designation: 'THE STRATEGIC MIND',
-    role: 'INTELLIGENCE ANALYST',
+    designation: 'THE ROOKIE OPERATIVE',
+    role: 'TRAINEE',
     profile:
-      'Information is power. MAVERICK looks beyond the obvious, identifying patterns and connecting details others might overlook. With a natural analytical approach and the ability to learn quickly, he turns scattered information into strategic insight.',
-    brief: 'Strategic insight. Turns scattered signals into a clear picture.',
-    capabilities: ['Strategic thinker', 'Analytical problem solver', 'Pattern recognition and information analysis', 'Quick learner'],
-    traits: ['ANALYSIS', 'PATTERN', 'INSIGHT'],
-    image: MEDIA.operativeMaverick,
+      'Every protocol has a first day. CADET is at the start of his — cleared for the room, not yet cleared for the field. He is learning the shape of the work the way it is actually done here: slowly, carefully and in the company of operatives who have already earned their record. Nothing about him is finished, and he is not pretending otherwise.',
+    brief: 'First day on the protocol. Learning the work, not yet cleared for the field.',
+    capabilities: [
+      'Developing member of the protocol',
+      'In structured training under the unit',
+      'No operational record yet — progression is the point',
+    ],
+    traits: ['ROOKIE', 'TRAINING', 'PROGRESSION'],
+    image: MEDIA.operativeCadet,
     accent: '#00C853',
     socials: [],
     skills: [],
-    signature: 'analysis',
+    signature: 'cadet',
     node: { x: 92, y: 52 },
-    missions: ['secleaf-2026'],
+    missions: [],
     published: true,
   },
 ]
@@ -250,6 +271,8 @@ export const missionHistoryCopy = {
   heading: 'MISSION HISTORY',
   support: 'CLASSIFIED RECORD OF CONFIRMED OPERATIONAL PARTICIPATION.',
   empty: 'NO CONFIRMED OPERATION ON FILE',
+  emptyNote:
+    'TRAINEE STATUS — NOT YET ASSIGNED. This is an empty record, not a withheld one.',
   soloLabel: 'SOLO OPERATION',
   typeLabel: 'MISSION TYPE',
   assignedLabel: 'ASSIGNED OPERATIVE',

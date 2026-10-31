@@ -66,16 +66,25 @@ participant lists, system status counters and timeline cross-references all read
 two files, so a participation change updates every surface at once. No display name is
 used as a key, and no relationship is stored twice.
 
-Exactly 6 operatives, 4 operations, 13 assignments, 2 completed, 2 ongoing — with
+Exactly 6 operatives, 4 operations, 11 assignments, 2 completed, 2 ongoing — with
 BLACKOUT a solo assignment held by GHOST alone. `npm run qa` asserts all of it.
+
+**Roster.** GHOST (LEAD OPERATOR), SHADOW (HACKER), PHANTOM (TECH OPERATIVE),
+SPECTRE (TECHNICAL OPERATIVE), ROGUE (TECHNICAL OPERATIVE) and CADET (TRAINEE). ROGUE and
+CADET replaced the former CIPHER and MAVERICK identities; their portraits, numbers and
+mission records were carried across, and the retired codenames appear nowhere in `src/`
+(the QA suite sweeps for them, allow-listing the "cipher suite" crypto term in the contact
+handshake).
 
 The capability matrix adds a second, separate axis: `arsenalTools[].teamWide` marks the
 tooling this site declares for the unit, while `operatives[].skills` is per-person
 evidence. Those are deliberately different fields. A team declaration can never produce
-a `VERIFIED` cell for an individual — it produces `UNIT TOOLKIT` instead. Every one of the
-six `skills` arrays is currently empty, so the matrix shows no individually verified
-skill, and the section says so on the page. Filling in a `skills` array is the only thing
-that changes it.
+a `VERIFIED` cell for an individual — it produces `UNIT TOOLKIT` instead. . Every one of the
+six `skills` arrays is currently empty, so no individual skill is verified — every
+person-column and every row reads **PENDING VERIFICATION** or **UNIT TOOLKIT**, and the
+section states that on the page. Filling in a `skills` array is the only thing that
+changes it. Rank, codename, mission participation and job description are never promoted
+into evidence.
 
 **Animation & interaction**
 
@@ -268,12 +277,15 @@ every operative dossier in the same render**.
 
 Current confirmed participation:
 
-| Mission | GHOST | SHADOW | PHANTOM | SPECTRE | CIPHER | MAVERICK |
+| Mission | GHOST | SHADOW | PHANTOM | SPECTRE | ROGUE | CADET |
 | --- | --- | --- | --- | --- | --- | --- |
 | ZeroSecure 2.0 | yes | yes | yes | — | — | — |
 | Cyber Ekathon | yes | yes | — | yes | — | — |
 | BLACKOUT (solo) | yes | — | — | — | — | — |
-| SECLEAF 2026 | yes | yes | yes | yes | yes | yes |
+| SECLEAF 2026 | yes | yes | yes | — | yes | — |
+
+That is **11 operative-to-mission assignments** (4 + 3 + 2 + 1 + 1 + 0). CADET is an
+active member with no assigned operation, and BLACKOUT remains solo to GHOST.
 
 `data/team.ts` imports `data/missions.ts` (not the reverse), so there is no import cycle.
 Operatives are the only thing that references missions; mission-side operatives-assigned
@@ -395,13 +407,13 @@ element jumped past by a fast scroll may never intersect at all. Therefore:
 npm run qa
 ```
 
-Server-renders every section and asserts 407 requirements: all six identities, the six
+Server-renders every section and asserts 458 requirements: all six identities, the six
 profile descriptions reproduced verbatim, unique portrait files present on disk, the four
 missions with their exact statuses, the exact mission-participation matrix (including
 BLACKOUT being GHOST-only and solo), required copy, forbidden strings (including
 `BIDBOSS`), absence of invented socials/awards/dates, `alt`/lazy/dimension hygiene,
 manifest validity, and SEO metadata. It also checks the derived model — 6 operatives,
-4 missions, 13 assignments, 2 completed, 2 ongoing, 2 active, 2 archived, one solo
+4 missions, 11 assignments, 2 completed, 2 ongoing, 2 active, 2 archived, one solo
 operation — that no mission ships a fabricated debrief, that no timeline entry invents a
 date, that redactions contain no credential-like strings, and that Arsenal tools carry no
 proficiency levels.

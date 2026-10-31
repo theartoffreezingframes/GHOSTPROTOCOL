@@ -10,6 +10,8 @@
  *
  *   VERIFIED                the operative's own record declares a tool in
  *                           this category. Cites exactly which one.
+ *   PENDING VERIFICATION    an individual claim is expected but not yet
+ *                           confirmed. Nothing is inferred to fill the gap.
  *   UNIT TOOLKIT            the tool is declared for the unit, but no
  *                           individual record claims it. This is a
  *                           team-level fact, never a claim about a person.
@@ -24,7 +26,12 @@
 import { arsenalGroups, arsenalTools, type ArsenalGroupId, type ArsenalTool } from '../data/site'
 import { activeOperatives } from '../data/team'
 
-export type SkillState = 'VERIFIED' | 'UNIT TOOLKIT' | 'NOT SPECIFIED' | 'INFORMATION UNAVAILABLE'
+export type SkillState =
+  | 'VERIFIED'
+  | 'PENDING VERIFICATION'
+  | 'UNIT TOOLKIT'
+  | 'NOT SPECIFIED'
+  | 'INFORMATION UNAVAILABLE'
 
 export type SkillCategoryId =
   | ArsenalGroupId
@@ -168,11 +175,14 @@ export function skillCell(codename: string, category: SkillCategory): SkillCell 
     }
   }
 
+  // 3. Nothing on file for this person. Individual skill stays pending —
+  //    rank, codename, participation and job description are never
+  //    promoted into evidence.
   return {
-    state: 'NOT SPECIFIED',
+    state: 'PENDING VERIFICATION',
     tools: [],
     label: '—',
-    detail: `${category.label}: no tool documented for ${codename}. This is a gap in the record, not a negative finding.`,
+    detail: `${category.label}: ${codename} has no confirmed tooling on file. Pending verification — nothing is inferred from rank or role.`,
   }
 }
 
@@ -201,12 +211,15 @@ export const skillMatrixCopy = {
   teamRow: 'UNIT TOOLKIT',
   states: {
     VERIFIED: 'VERIFIED',
+    'PENDING VERIFICATION': 'PENDING',
     'UNIT TOOLKIT': 'UNIT TOOLKIT',
     'NOT SPECIFIED': 'NOT SPECIFIED',
     'INFORMATION UNAVAILABLE': 'INFO UNAVAILABLE',
   } as Record<SkillState, string>,
   stateNotes: {
     VERIFIED: "This operative's own record declares a tool in this category.",
+    'PENDING VERIFICATION':
+      'No confirmed tooling on file for this operative. Not inferred from rank or role.',
     'UNIT TOOLKIT': 'The unit declares this tooling; no individual record claims it.',
     'NOT SPECIFIED': 'Operative on record; no tool-level evidence for this category.',
     'INFORMATION UNAVAILABLE': 'This axis is not tool-based, so the site claims nothing.',
@@ -214,6 +227,8 @@ export const skillMatrixCopy = {
   unitRow: 'UNIT TOOLKIT',
   unitNote:
     'Declared for the collective as a whole. It is not evidence about any single operative.',
+  pendingBanner:
+    'INDIVIDUAL SKILLS ARE PENDING VERIFICATION. No operative record names a tool of their own yet, so no person-column claims a skill. Rank, codename, mission participation and job description are never treated as evidence.',
   legendTitle: 'READING THE MATRIX',
   footnote:
     'No percentages, experience levels, proficiency scores or rankings appear here by design. A dash means the record is silent — it does not mean the operative lacks the skill.',
