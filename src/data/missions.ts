@@ -28,6 +28,19 @@ export type MissionField = {
   value: string | null
 }
 
+export type MissionDebrief = {
+  /** One-paragraph verified overview. null → INFORMATION CLASSIFIED. */
+  overview: string | null
+  /** Only tools/technologies that can actually be verified. */
+  technologies: string[]
+  /** Only documented outcomes. */
+  achievements: string[]
+  /** Only documented lessons. */
+  lessons: string[]
+  /** Only real evidence — repo links, write-ups, artefacts. */
+  evidence: { label: string; href: string }[]
+}
+
 export type Mission = {
   /** Stable identifier — operatives reference this, never the display name. */
   id: MissionId
@@ -43,8 +56,11 @@ export type Mission = {
   image: MediaAsset | null
   /** SOLO = a single operative was assigned. Derived labels read from this. */
   operationType: 'SOLO' | 'TEAM'
-  /** Extra narrative blocks revealed in the expandable record. */
-  dossier: MissionField[]
+  /**
+   * Expandable debrief. Every field is unverified until supplied, so each
+   * renders an explicit classification placeholder — nothing is invented.
+   */
+  debrief: MissionDebrief
   /** Results / achievements — only list what can be verified. */
   outcomes: string[]
   tags: string[]
@@ -94,14 +110,13 @@ export const missions: Mission[] = [
     venue: null,
     summary: null,
     image: MEDIA.missionZeroSecure,
-    dossier: [
-      { label: 'EVENT DESCRIPTION', value: null },
-      { label: 'TEAM PARTICIPATION', value: null },
-      { label: 'COMPETITION DETAILS', value: null },
-      { label: 'CHALLENGES', value: null },
-      { label: 'EXPERIENCE GAINED', value: null },
-      { label: 'RESULTS & ACHIEVEMENTS', value: null },
-    ],
+    debrief: {
+      overview: null,
+      technologies: [],
+      achievements: [],
+      lessons: [],
+      evidence: [],
+    },
     outcomes: [],
     tags: ['SECURITY', 'HACKATHON'],
     published: true,
@@ -118,14 +133,13 @@ export const missions: Mission[] = [
     venue: null,
     summary: null,
     image: MEDIA.missionCyberEkathon,
-    dossier: [
-      { label: 'EVENT DESCRIPTION', value: null },
-      { label: 'PARTICIPATION DETAILS', value: null },
-      { label: 'PROBLEM STATEMENTS', value: null },
-      { label: 'TEAM ACTIVITIES', value: null },
-      { label: 'PROJECTS & SOLUTIONS', value: null },
-      { label: 'RESULTS & ACHIEVEMENTS', value: null },
-    ],
+    debrief: {
+      overview: null,
+      technologies: [],
+      achievements: [],
+      lessons: [],
+      evidence: [],
+    },
     outcomes: [],
     tags: ['HACKATHON', 'BUILD'],
     published: true,
@@ -142,13 +156,13 @@ export const missions: Mission[] = [
     venue: null,
     summary: null,
     image: MEDIA.missionBlackout,
-    dossier: [
-      { label: 'MISSION BRIEF', value: null },
-      { label: 'DATE', value: null },
-      { label: 'VENUE', value: null },
-      { label: 'OBJECTIVES', value: null },
-      { label: 'ACCESS LEVEL', value: 'CLASSIFIED' },
-    ],
+    debrief: {
+      overview: null,
+      technologies: [],
+      achievements: [],
+      lessons: [],
+      evidence: [],
+    },
     outcomes: [],
     tags: ['ACTIVE', 'CLASSIFIED'],
     feature: true,
@@ -166,13 +180,13 @@ export const missions: Mission[] = [
     venue: null,
     summary: null,
     image: MEDIA.missionSecleaf,
-    dossier: [
-      { label: 'MISSION BRIEF', value: null },
-      { label: 'DATE', value: null },
-      { label: 'VENUE', value: null },
-      { label: 'OBJECTIVES', value: null },
-      { label: 'ACCESS LEVEL', value: 'CLASSIFIED' },
-    ],
+    debrief: {
+      overview: null,
+      technologies: [],
+      achievements: [],
+      lessons: [],
+      evidence: [],
+    },
     outcomes: [],
     tags: ['ACTIVE', 'BRIEFING'],
     published: true,
@@ -230,4 +244,32 @@ export const missionMeta = {
   archiveLabel: 'ARCHIVE',
   liveLabel: 'LIVE OPERATIONS',
   showArchived: 'SHOW ARCHIVED',
+}
+
+/* ── Debrief presentation copy ───────────────────────────────────────
+   One vocabulary for unavailable information, so a missing field can
+   never silently look like a real one.                              */
+export const debriefCopy = {
+  heading: 'OPERATION DEBRIEF',
+  open: 'OPEN DEBRIEF',
+  close: 'COLLAPSE DEBRIEF',
+  classified: 'INFORMATION CLASSIFIED',
+  notProvided: 'DETAILS NOT PROVIDED',
+  notAvailable: 'DEBRIEF NOT AVAILABLE',
+  ongoing: 'OPERATION IN PROGRESS',
+  ongoingStatus: 'STATUS: ONGOING',
+  ongoingDebrief: 'DEBRIEF: NOT YET AVAILABLE',
+  confirmedOperatives: 'CONFIRMED PARTICIPANTS',
+  soloType: 'MISSION TYPE',
+  soloLabel: 'SOLO OPERATION',
+  assignedOperative: 'ASSIGNED OPERATIVE',
+  access: 'ACCESS',
+  accessValue: 'CLASSIFIED',
+  evidence: 'EVIDENCE & LINKS',
+  labels: {
+    overview: 'VERIFIED OVERVIEW',
+    technologies: 'TECHNOLOGIES & TOOLS',
+    achievements: 'DOCUMENTED ACHIEVEMENTS',
+    lessons: 'LESSONS LEARNED',
+  },
 }

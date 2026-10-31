@@ -2,7 +2,16 @@ import { useId, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { Archive, Check, ChevronDown, FileLock2, MapPin, Radio, ScanLine } from 'lucide-react'
 
-import { archiveRows, featureMission, missionMeta, statusCounts, statusDisplay, type Mission } from '../data/missions'
+import {
+  archiveRows,
+  debriefCopy,
+  featureMission,
+  missionMeta,
+  statusCounts,
+  statusDisplay,
+  type Mission,
+} from '../data/missions'
+import { operativesForMission } from '../lib/model'
 import { imageFallback, imageSrcSet } from '../lib/media'
 import { EASE_OUT_EXPO } from '../lib/motion'
 import { cn } from '../lib/utils'
@@ -240,32 +249,7 @@ function MissionRecord({ mission, index, live = false }: { mission: Mission; ind
                   transition={{ duration: 0.6, ease: EASE_OUT_EXPO }}
                   className="overflow-hidden"
                 >
-                  <ul className="pt-4">
-                    {mission.dossier.map((field, i) => (
-                      <motion.li
-                        key={field.label}
-                        className="flex items-start gap-3 border-b border-line-soft/70 py-2.5 last:border-0"
-                        initial={reduce ? { opacity: 0 } : { opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.45, delay: 0.04 * i, ease: EASE_OUT_EXPO }}
-                      >
-                        <span className="font-tech mt-[3px] w-5 shrink-0 text-[0.7rem] tracking-[0.16em] text-neon/50">
-                          {String(i + 1).padStart(2, '0')}
-                        </span>
-                        <div className="min-w-0">
-                          <p className="font-tech text-[0.66rem] tracking-[0.18em] text-mute/80">{field.label}</p>
-                          <p
-                            className={cn(
-                              'mt-1 text-[0.8rem] leading-snug',
-                              field.value ? 'text-bone/90' : 'font-tech text-[0.66rem] tracking-[0.18em] text-mute/65',
-                            )}
-                          >
-                            {field.value ?? '[ ENCRYPTED · AWAITING SUPPLY ]'}
-                          </p>
-                        </div>
-                      </motion.li>
-                    ))}
-                  </ul>
+                  <OperationDebrief mission={mission} index={index} reduce={Boolean(reduce)} />
                 </motion.div>
               )}
             </AnimatePresence>
@@ -289,6 +273,163 @@ function MissionRecord({ mission, index, live = false }: { mission: Mission; ind
         </span>
       </div>
     </motion.article>
+  )
+}
+
+/**
+ * OPERATION DEBRIEF
+ * Completed operations get the full field set; ongoing ones explicitly
+ * refuse to show a debrief rather than inventing one. Every unverified
+ * field states its own absence.
+ */
+function OperationDebrief({
+  mission,
+  index,
+  reduce,
+}: {
+  mission: Mission
+  index: number
+  reduce: boolean
+}) {
+  const status = statusDisplay[mission.status]
+  const members = operativesForMission(mission.id)
+  const debrief = mission.debrief
+  const ongoing = status.active
+
+  const rows: { label: string; value: string | null; list?: string[] }[] = [
+    { label: debriefCopy.labels.overview, value: debrief.overview },
+    { label: debriefCopy.labels.technologies, value: null, list: debrief.technologies },
+    { label: debriefCopy.labels.achievements, value: null, list: debrief.achievements },
+    { label: debriefCopy.labels.lessons, value: null, list: debrief.lessons },
+  ]
+
+  return (
+    <div className="pt-4">
+      {/* header */}
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        <span className="font-tech flex items-center gap-1.5 border border-neon/30 px-2 py-1 text-[0.52rem] tracking-[0.16em] text-neon">
+          <FileLock2 size={8} aria-hidden="true" />
+          {debriefCopy.heading}
+        </span>
+        {mission.operationType === 'SOLO' && (
+          <span className="font-tech border border-neon/40 px-2 py-1 text-[0.52rem] tracking-[0.16em] text-neon">
+            {debriefCopy.soloLabel}
+          </span>
+        )}
+        <span className="font-tech ml-auto text-[0.5rem] tracking-[0.16em] text-mute/45">
+          FILE {mission.number}
+        </span>
+      </div>
+
+      {/* outcome line */}
+      {ongoing ? (
+        <div className="mb-3 border border-neon/25 bg-neon/[0.04] px-3 py-2">
+          <p className="font-tech text-[0.58rem] tracking-[0.16em] text-neon">{debriefCopy.ongoing}</p>
+          <p className="font-tech mt-1 text-[0.55rem] tracking-[0.14em] text-mute/70">
+            {debriefCopy.ongoingStatus}
+          </p>
+          <p className="font-tech mt-0.5 text-[0.55rem] tracking-[0.14em] text-mute/70">
+            {debriefCopy.ongoingDebrief}
+          </p>
+        </div>
+      ) : (
+        <p className="font-tech mb-3 border-l border-emerald/40 px-3 text-[0.55rem] tracking-[0.14em] text-emerald/80">
+          OPERATION CLOSED // RECORD SEALED
+        </p>
+      )}
+
+      {/* participants + classification */}
+      <div className="mb-3 border border-line-soft/70 px-3 py-2">
+        <p className="font-tech text-[0.5rem] tracking-[0.16em] text-mute/50">
+          {debriefCopy.confirmedOperatives}
+        </p>
+        <p className="font-tech mt-1 flex flex-wrap gap-x-2 gap-y-1 text-[0.58rem] tracking-[0.12em] text-bone/85">
+          {members.length > 0 ? (
+            members.map((operative) => <span key={operative.number}>{operative.codename}</span>)
+          ) : (
+            <span className="text-mute/50">{debriefCopy.notProvided}</span>
+          )}
+        </p>
+        <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-line-soft/50 pt-1.5">
+          <span className="font-tech text-[0.5rem] tracking-[0.14em] text-mute/45">
+            {debriefCopy.soloType}: <span className="text-bone/70">{mission.operationType}</span>
+          </span>
+          <span className="font-tech text-[0.5rem] tracking-[0.14em] text-mute/45">
+            {debriefCopy.assignedOperative}:{' '}
+            <span className="text-bone/70">
+              {mission.operationType === 'SOLO'
+                ? members.map((operative) => operative.codename).join(' · ') || debriefCopy.notProvided
+                : debriefCopy.notProvided}
+            </span>
+          </span>
+          <span className="font-tech text-[0.5rem] tracking-[0.14em] text-mute/45">
+            {debriefCopy.access}: <span className="text-neon/80">{debriefCopy.accessValue}</span>
+          </span>
+        </div>
+      </div>
+
+      {/* debrief fields — never fabricated */}
+      <ul>
+        {rows.map((row, i) => {
+          const hasTree = row.list && row.list.length > 0
+          return (
+            <motion.li
+              key={row.label}
+              className="flex items-start gap-3 border-b border-line-soft/70 py-2.5 last:border-0"
+              initial={reduce ? { opacity: 0 } : { opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.45, delay: 0.04 * i + 0.05 * index, ease: EASE_OUT_EXPO }}
+            >
+              <span className="font-tech mt-[3px] w-5 shrink-0 text-[0.66rem] tracking-[0.16em] text-neon/50">
+                {String(i + 1).padStart(2, '0')}
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="font-tech text-[0.6rem] tracking-[0.16em] text-mute/80">{row.label}</p>
+                {row.value ? (
+                  <p className="mt-1 text-[0.78rem] leading-snug text-bone/90">{row.value}</p>
+                ) : hasTree ? (
+                  <ul className="mt-1 space-y-0.5">
+                    {row.list!.map((item) => (
+                      <li key={item} className="font-tech text-[0.62rem] tracking-[0.12em] text-bone/80">
+                        · {item}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="font-tech mt-1 inline-flex items-center gap-1.5 border border-line px-1.5 py-0.5 text-[0.52rem] tracking-[0.14em] text-mute/45">
+                    {ongoing
+                      ? debriefCopy.notAvailable
+                      : i === 0
+                        ? debriefCopy.classified
+                        : debriefCopy.notProvided}
+                  </p>
+                )}
+              </div>
+            </motion.li>
+          )
+        })}
+      </ul>
+
+      {/* evidence — only real links, otherwise an explicit absence */}
+      <div className="mt-2 flex flex-wrap items-center gap-2 border-t border-line-soft/70 pt-2">
+        <span className="font-tech text-[0.5rem] tracking-[0.16em] text-mute/50">{debriefCopy.evidence}</span>
+        {debrief.evidence.length > 0 ? (
+          debrief.evidence.map((item) => (
+            <a
+              key={item.href}
+              href={item.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-tech text-[0.52rem] tracking-[0.14em] text-neon hover:text-bone"
+            >
+              {item.label}
+            </a>
+          ))
+        ) : (
+          <span className="font-tech text-[0.5rem] tracking-[0.14em] text-mute/40">{debriefCopy.notProvided}</span>
+        )}
+      </div>
+    </div>
   )
 }
 

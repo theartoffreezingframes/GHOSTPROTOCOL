@@ -26,6 +26,8 @@ import { Reveal } from '../components/Reveal'
 import { SectionHeading } from '../components/SectionHeading'
 import { HudFrame } from '../components/HudFrame'
 import { StatusPill } from '../components/StatusPill'
+import { useDossier } from '../components/DossierProvider'
+import { playSound } from '../lib/audio'
 
 const SIGNATURE_LABEL: Record<Operative['signature'], string> = {
   command: 'COMMAND',
@@ -109,6 +111,7 @@ export function Operatives() {
 function OperativeCard({ operative, index }: { operative: Operative; index: number }) {
   const reduce = useReducedMotion()
   const [open, setOpen] = useState(false)
+  const { open: openAccess } = useDossier()
   const cardRef = useRef<HTMLDivElement>(null)
   const id = useId()
 
@@ -323,7 +326,22 @@ function OperativeCard({ operative, index }: { operative: Operative; index: numb
           <div className="mt-auto pt-4">
             <button
               type="button"
-              onClick={() => setOpen((v) => !v)}
+              onClick={() => {
+                playSound('dossier')
+                openAccess(operative.codename)
+              }}
+              className="font-tech mb-2 flex w-full items-center justify-between border border-neon/30 px-2.5 py-2 text-[0.62rem] tracking-[0.18em] text-neon transition-colors hover:bg-neon/10"
+            >
+              ACCESS FILE
+              <Lock size={9} aria-hidden="true" />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                playSound('terminal')
+                setOpen((v) => !v)
+              }}
               aria-expanded={open}
               {...(open ? { 'aria-controls': `${id}-detail` } : {})}
               className="font-tech group/btn flex w-full items-center justify-between border-t border-line-soft py-3 text-[0.7rem] tracking-[0.2em] text-mute transition-colors hover:text-neon focus-visible:text-neon"

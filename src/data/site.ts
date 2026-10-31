@@ -26,17 +26,32 @@ export const brand = {
   established: null as number | null,
 } as const
 
-export type NavItem = { id: string; index: string; label: string; short: string }
+export type NavItem = {
+  id: string
+  index: string
+  label: string
+  short: string
+  /** Rendered in the bar itself; the rest live behind the SECTIONS menu. */
+  primary?: boolean
+}
 
 export const nav: NavItem[] = [
-  { id: 'protocol', index: '01', label: 'The Protocol', short: 'Protocol' },
-  { id: 'operatives', index: '02', label: 'Operatives', short: 'Operatives' },
-  { id: 'missions', index: '03', label: 'Operations', short: 'Ops' },
-  { id: 'lab', index: '04', label: 'Engineering Lab', short: 'Lab' },
-  { id: 'arsenal', index: '05', label: 'Arsenal', short: 'Arsenal' },
-  { id: 'record', index: '06', label: 'Record', short: 'Record' },
-  { id: 'contact', index: '07', label: 'Connection', short: 'Connect' },
+  { id: 'protocol', index: '01', label: 'The Protocol', short: 'Protocol', primary: true },
+  { id: 'operatives', index: '02', label: 'Operatives', short: 'Operatives', primary: true },
+  { id: 'network', index: '03', label: 'Operative Network', short: 'Network', primary: true },
+  { id: 'missions', index: '04', label: 'Operations', short: 'Ops', primary: true },
+  { id: 'transmissions', index: '05', label: 'Transmissions', short: 'Signals' },
+  { id: 'lab', index: '06', label: 'Engineering Lab', short: 'Lab' },
+  { id: 'arsenal', index: '07', label: 'Arsenal', short: 'Arsenal', primary: true },
+  { id: 'radar', index: '08', label: 'Threat Radar', short: 'Radar' },
+  { id: 'timeline', index: '09', label: 'Timeline', short: 'Timeline' },
+  { id: 'record', index: '10', label: 'Record', short: 'Record' },
+  { id: 'intel', index: '11', label: 'Redacted Files', short: 'Intel' },
+  { id: 'contact', index: '12', label: 'Connection', short: 'Connect', primary: true },
 ]
+
+export const primaryNav = nav.filter((item) => item.primary)
+export const secondaryNav = nav.filter((item) => !item.primary)
 
 export const hero = {
   headline: ['WE ARE THE GHOSTS', 'IN THE MACHINE.'],
@@ -156,6 +171,92 @@ export const arsenal: ArsenalCategory[] = [
     items: ['Artificial Intelligence', 'Machine Learning', 'LLMs', 'AI-Powered Development'],
   },
 ]
+
+/* ── TECHNICAL ARSENAL 2.0 ──────────────────────────────────────────
+   Only technologies already present in this project's arsenal are
+   listed. `description` and `docs` stay null unless the detail can be
+   verified — the card then shows a classified placeholder instead.
+   No expertise levels, certifications or per-operative claims.       */
+
+export type ArsenalGroupId =
+  | 'programming'
+  | 'security'
+  | 'ai'
+  | 'tools'
+  | 'frameworks'
+  | 'platforms'
+
+export type ArsenalTool = {
+  id: string
+  name: string
+  group: ArsenalGroupId
+  /** Extra terms that should match in search. */
+  aliases: string[]
+  description: string | null
+  docs: string | null
+}
+
+export const arsenalGroups: { id: ArsenalGroupId; index: string; label: string; note: string }[] = [
+  { id: 'programming', index: '01', label: 'PROGRAMMING LANGUAGES', note: 'LANGUAGES WE BUILD WITH' },
+  { id: 'security', index: '02', label: 'CYBERSECURITY', note: 'OFFENSIVE & DEFENSIVE FOUNDATIONS' },
+  { id: 'ai', index: '03', label: 'AI / MACHINE LEARNING', note: 'INTELLIGENCE LAYER' },
+  { id: 'frameworks', index: '04', label: 'FRAMEWORKS & LIBRARIES', note: 'INTERFACES & SERVICES' },
+  { id: 'tools', index: '05', label: 'DEVELOPMENT TOOLS', note: 'BUILD & SHIP' },
+  { id: 'platforms', index: '06', label: 'PLATFORMS & ENVIRONMENTS', note: 'WHERE IT RUNS' },
+]
+
+export const arsenalTools: ArsenalTool[] = [
+  // programming
+  { id: 'python', name: 'Python', group: 'programming', aliases: ['py'], description: null, docs: null },
+  { id: 'c', name: 'C', group: 'programming', aliases: [], description: null, docs: null },
+  { id: 'cpp', name: 'C++', group: 'programming', aliases: ['cplusplus'], description: null, docs: null },
+  { id: 'java', name: 'Java', group: 'programming', aliases: [], description: null, docs: null },
+  { id: 'javascript', name: 'JavaScript', group: 'programming', aliases: ['js'], description: null, docs: null },
+  { id: 'typescript', name: 'TypeScript', group: 'programming', aliases: ['ts'], description: null, docs: null },
+  { id: 'html', name: 'HTML', group: 'programming', aliases: [], description: null, docs: null },
+  { id: 'css', name: 'CSS', group: 'programming', aliases: [], description: null, docs: null },
+
+  // security
+  { id: 'linux', name: 'Linux', group: 'security', aliases: ['unix'], description: null, docs: null },
+  { id: 'networking', name: 'Networking', group: 'security', aliases: ['tcp', 'ip'], description: null, docs: null },
+  { id: 'web-security', name: 'Web Security', group: 'security', aliases: ['appsec'], description: null, docs: null },
+  { id: 'ctf', name: 'CTF Challenges', group: 'security', aliases: ['capture the flag'], description: null, docs: null },
+  { id: 'security-fundamentals', name: 'Security Fundamentals', group: 'security', aliases: [], description: null, docs: null },
+
+  // ai
+  { id: 'ai', name: 'Artificial Intelligence', group: 'ai', aliases: ['ai'], description: null, docs: null },
+  { id: 'ml', name: 'Machine Learning', group: 'ai', aliases: ['ml'], description: null, docs: null },
+  { id: 'llm', name: 'LLMs', group: 'ai', aliases: ['large language models'], description: null, docs: null },
+  { id: 'ai-dev', name: 'AI-Powered Development', group: 'ai', aliases: ['assisted coding'], description: null, docs: null },
+
+  // frameworks (already on site: React, Node.js)
+  { id: 'react', name: 'React', group: 'frameworks', aliases: ['reactjs'], description: null, docs: null },
+  { id: 'node', name: 'Node.js', group: 'frameworks', aliases: ['node', 'nodejs'], description: null, docs: null },
+  { id: 'vite', name: 'Vite', group: 'frameworks', aliases: ['build'], description: null, docs: null },
+  { id: 'tailwind', name: 'Tailwind CSS', group: 'frameworks', aliases: ['tailwind'], description: null, docs: null },
+
+  // tools (present in this repo's own toolchain)
+  { id: 'git', name: 'Git', group: 'tools', aliases: ['version control'], description: null, docs: null },
+  { id: 'vitest', name: 'TypeScript Compiler', group: 'tools', aliases: ['tsc', 'typecheck'], description: null, docs: null },
+  { id: 'sharp', name: 'Sharp', group: 'tools', aliases: ['image pipeline'], description: null, docs: null },
+
+  // platforms
+  { id: 'browser', name: 'Web Browsers', group: 'platforms', aliases: ['web'], description: null, docs: null },
+  { id: 'vercel', name: 'Vercel', group: 'platforms', aliases: ['deploy', 'hosting'], description: null, docs: null },
+]
+
+export const arsenalCopy = {
+  heading: ['OUR TOOLS.', 'OUR CAPABILITIES.'],
+  label: 'TECHNICAL ARSENAL',
+  search: 'SEARCH ARSENAL',
+  searchPlaceholder: 'FILTER BY TECHNOLOGY…',
+  all: 'ALL',
+  empty: 'NO MATCH IN ARSENAL',
+  emptyNote: 'No technology on this list matches that filter.',
+  classified: 'DETAILS NOT PROVIDED',
+  docs: 'OFFICIAL DOCUMENTATION',
+  results: (n: number) => `${String(n).padStart(2, '0')} TECHNOLOGIES`,
+}
 
 export const arsenalDisclaimer =
   'Capability map, not a claim of individual mastery — every operative specialises differently.'

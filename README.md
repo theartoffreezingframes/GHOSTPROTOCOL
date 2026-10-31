@@ -26,17 +26,38 @@ neon accent, oversized display type, technical HUD chrome, restrained motion.
 
 **Sections**
 
-| # | Section | Notes |
-| --- | --- | --- |
-| — | Boot sequence | Terminal init, skippable, once per session |
-| — | Hero | Command-centre plate, deadpan HUD status, dual CTAs |
-| 01 | The Protocol | Editorial asymmetry, philosophy rail, unit stats |
-| 02 | Operative Database | GHOST / SHADOW / PHANTOM dossiers |
-| 03 | Classified Operations | ZeroSecure 2.0, Cyber Ekathon, BLACKOUT |
-| 04 | Engineering Lab | Open bays only — no invented builds |
-| 05 | Technical Arsenal | Terminal browser + capability matrix |
-| 06 | Record of Operations | Verified-only timeline |
-| 07 | Establish Connection | Handshake terminal, channels, closing signature |
+| # | Section | Anchor | Notes |
+| --- | --- | --- | --- |
+| — | Boot sequence | — | Terminal init, skippable, once per session |
+| — | Hero | `#top` | Command-centre plate, deadpan HUD status, dual CTAs |
+| 01 | The Protocol | `#protocol` | Editorial asymmetry, philosophy rail, unit stats |
+| 02 | Operative Database | `#operatives` | Six faceless dossiers + mission history + dossier access sequence |
+| 03 | Operative Network | `#network` | SVG participation graph, 10 nodes, 13 derived edges |
+| 04 | Classified Operations | `#missions` | Four operations with an expandable debrief archive |
+| 05 | Encrypted Transmissions | `#transmissions` | Fictional terminal feed, five expandable intercepts |
+| 06 | Engineering Lab | `#lab` | Open bays only — no invented builds |
+| 07 | Technical Arsenal | `#arsenal` | Filterable index (6 categories), search, capability matrix |
+| 08 | Threat Radar | `#radar` | Fictional sweeping display, pause/resume, 5 decorative contacts |
+| 09 | Protocol Timeline | `#timeline` | Five milestones, expandable, undated where unknown |
+| 10 | Record of Operations | `#record` | Verified-only operation record |
+| 11 | Redacted Files | `#intel` | Three classified cards with click-to-reveal bars |
+| — | System Status | `#status` | Four tactical counters computed from the data model |
+| 12 | Establish Connection | `#contact` | Handshake terminal, channels, closing signature |
+
+The header shows five primary links plus a **SECTIONS** menu; the mobile sheet lists
+all twelve. Nothing is reachable only by scroll.
+
+**Shared data model**
+
+One participation record drives everything. `src/data/team.ts` gives each operative a
+`missions: MissionId[]` array; `src/lib/model.ts` derives `stats`, `operativesForMission()`
+and `missionsForOperative()` from it. The network graph, dossier mission history, debrief
+participant lists, system status counters and timeline cross-references all read the same
+two files, so a participation change updates every surface at once. No display name is
+used as a key, and no relationship is stored twice.
+
+Exactly 6 operatives, 4 operations, 13 assignments, 2 completed, 2 ongoing — with
+BLACKOUT a solo assignment held by GHOST alone. `npm run qa` asserts all of it.
 
 **Animation & interaction**
 
@@ -137,7 +158,7 @@ npm ci          # clean install from package-lock.json
 
 ```bash
 npm run dev     # http://localhost:5173 (bound to 0.0.0.0)
-npm run qa      # server-render content + markup assertions
+npm run qa      # server-render content, model + markup assertions (244 checks)
 npm run typecheck
 ```
 
@@ -356,12 +377,36 @@ element jumped past by a fast scroll may never intersect at all. Therefore:
 npm run qa
 ```
 
-Server-renders every section and asserts 218 requirements: all six identities, the six
+Server-renders every section and asserts 244 requirements: all six identities, the six
 profile descriptions reproduced verbatim, unique portrait files present on disk, the four
 missions with their exact statuses, the exact mission-participation matrix (including
 BLACKOUT being GHOST-only and solo), required copy, forbidden strings (including
 `BIDBOSS`), absence of invented socials/awards/dates, `alt`/lazy/dimension hygiene,
-manifest validity, and SEO metadata.
+manifest validity, and SEO metadata. It also checks the derived model — 6 operatives,
+4 missions, 13 assignments, 2 completed, 2 ongoing, 2 active, 2 archived, one solo
+operation — that no mission ships a fabricated debrief, that no timeline entry invents a
+date, that redactions contain no credential-like strings, and that Arsenal tools carry no
+proficiency levels.
+
+---
+
+## Interface wording (deliberate)
+
+Several surfaces look like live systems. They are not, and the copy says so on the page:
+
+| Surface | What it actually is |
+| --- | --- |
+| Dossier access | A four-step *visual* sequence. No authentication, no credential input, no password field, no security claim. Closable at any point; instant under reduced motion. |
+| Threat Radar | A decorative animation. It scans nothing, measures nothing, collects no IP or visitor data. Contacts are invented labels. |
+| System Status | Four counters computed from the site's own content model. `ONLINE` is a presentation label, not a backend signal. |
+| Encrypted Transmissions | Fictional copy written for the site, attributed to no real person and to no real communication. Timestamps read `TIME UNDISCLOSED`. |
+| Redacted Files | Invented placeholder text. No real credentials, keys, tokens or personal data appear anywhere in them. |
+| Timeline | Milestones only. Every date renders `DATE UNDISCLOSED` because none is verified. |
+| Interface audio | Off by default, never autoplays, generated with the Web Audio API (no files, no copyrighted recordings), low gain, one-shot cues. The site works fully silent. |
+
+Easter eggs (`ghost://override`, the Konami sequence, a five-tap emblem) are additive: they
+never intercept keystrokes inside inputs, never hijack browser shortcuts, and never block
+navigation.
 
 ---
 
@@ -373,9 +418,11 @@ values are labelled as unknown. Add real details to the data files and the site 
 them — nothing else needs to change.
 
 Operative portraits are **original AI-generated illustrations**, not photographs of the
-people named, and the section footnote says so on the page. They were produced for this
-site in one shared cinematic language (dark command environments, neon-green rim light,
-black tactical outerwear) with no real-person likeness, no film branding and no external
-image dependencies — every file is served locally from `public/media/`. The `profile`
+people named, and the section footnote says so on the page. Every face is a featureless
+pure-black void — no skin, eyes, nose or mouth, and no mask, skull or robot shapes — so no
+portrait can be read as a likeness of a real person. They were produced for this site in
+one shared cinematic language (dark command environments, neon-green rim light, black
+tactical outerwear) with no film branding and no external image dependencies — every file
+is served locally from `public/media/`. The `profile`
 narrative on each dossier is public-facing character copy, not a record of verified
 experience.

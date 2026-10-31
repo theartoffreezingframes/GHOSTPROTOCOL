@@ -36,10 +36,16 @@ try {
     server.ssrLoadModule('/src/sections/Hero.tsx'),
     server.ssrLoadModule('/src/sections/About.tsx'),
     server.ssrLoadModule('/src/sections/Operatives.tsx'),
+    server.ssrLoadModule('/src/sections/NetworkMap.tsx'),
     server.ssrLoadModule('/src/sections/Missions.tsx'),
+    server.ssrLoadModule('/src/sections/Transmissions.tsx'),
     server.ssrLoadModule('/src/sections/Projects.tsx'),
     server.ssrLoadModule('/src/sections/Arsenal.tsx'),
+    server.ssrLoadModule('/src/sections/ThreatRadar.tsx'),
+    server.ssrLoadModule('/src/sections/Timeline.tsx'),
     server.ssrLoadModule('/src/sections/Record.tsx'),
+    server.ssrLoadModule('/src/sections/RedactedFiles.tsx'),
+    server.ssrLoadModule('/src/sections/SystemStatus.tsx'),
     server.ssrLoadModule('/src/sections/Contact.tsx'),
   ])
   const [boot, nav, footer, cursor] = await Promise.all([
@@ -247,6 +253,90 @@ try {
   )
   check('solo label copy', team.missionHistoryCopy.soloLabel === 'SOLO OPERATION')
 
+  // ── derived numerical model ──────────────────────────────────
+  const model = await server.ssrLoadModule('/src/lib/model.ts')
+  const st = model.stats
+  check('stats: 6 operatives', st.operatives === 6, String(st.operatives))
+  check('stats: 4 missions', st.missions === 4, String(st.missions))
+  check('stats: 2 completed', st.completed === 2, String(st.completed))
+  check('stats: 2 ongoing', st.ongoing === 2, String(st.ongoing))
+  check('stats: 2 active operations', st.activeOperations === 2, String(st.activeOperations))
+  check('stats: 2 archived operations', st.archivedOperations === 2, String(st.archivedOperations))
+  check('stats: 13 assignments', st.assignments === 13, String(st.assignments))
+  check('stats: 1 solo operation', st.soloOperations === 1, String(st.soloOperations))
+
+  // ── network map derives from the same data ───────────────────
+  for (const mission of missionsData.archive) {
+    const assigned = model.operativesForMission(mission.id).map((o) => o.codename)
+    if (mission.id === 'blackout') {
+      check('network: blackout links only GHOST', assigned.join(',') === 'GHOST', assigned.join(','))
+    }
+    check(`network: ${mission.id} has participants`, assigned.length > 0)
+  }
+
+  // ── intel content guards ─────────────────────────────────────
+  const intel = await server.ssrLoadModule('/src/data/intel.ts')
+  check('transmissions present', intel.transmissions.length >= 4)
+  check(
+    'transmissions carry no timestamps (none verifiable)',
+    intel.transmissions.every((t) => t.time === null || typeof t.time === 'string'),
+  )
+  check('redacted files present', intel.intelligenceFiles.length === 3)
+  check(
+    'redactions are harmless strings',
+    intel.intelligenceFiles.every((f) =>
+      f.redactions.every((r) => !/(password|passwd|secret key|private key|api[_ -]?key|token)/i.test(r.reveal)),
+    ),
+  )
+  check('timeline entries present', intel.timeline.length === 5)
+  check(
+    'timeline invents no dates',
+    intel.timeline.every((entry) => entry.date === null),
+  )
+  check(
+    'timeline references only real mission ids',
+    intel.timeline.every((entry) => entry.missionId === null || missionsData.missions.some((m) => m.id === entry.missionId)),
+  )
+
+  // ── arsenal 2.0 ──────────────────────────────────────────────
+  check('arsenal groups = 6', site.arsenalGroups.length === 6)
+  check('arsenal tools present', site.arsenalTools.length >= 20, `${site.arsenalTools.length}`)
+  check(
+    'arsenal tools have unique ids',
+    new Set(site.arsenalTools.map((t) => t.id)).size === site.arsenalTools.length,
+  )
+  check(
+    'arsenal tools all belong to a listed group',
+    site.arsenalTools.every((t) => site.arsenalGroups.some((g) => g.id === t.group)),
+  )
+  check(
+    'arsenal claims no expertise levels',
+    !JSON.stringify(site.arsenalTools).match(/expert|advanced|beginner|proficient|mastery/i),
+  )
+  check(
+    'arsenal docs links are https or null',
+    site.arsenalTools.every((t) => t.docs === null || t.docs.startsWith('https://')),
+  )
+
+  // ── debrief integrity ────────────────────────────────────────
+  check(
+    'no mission ships a fabricated debrief',
+    missionsData.missions.every(
+      (m) =>
+        m.debrief.overview === null &&
+        m.debrief.technologies.length === 0 &&
+        m.debrief.achievements.length === 0 &&
+        m.debrief.lessons.length === 0 &&
+        m.debrief.evidence.length === 0,
+    ),
+  )
+  check(
+    'ongoing missions cannot show a completed debrief',
+    missionsData.missions
+      .filter((m) => m.status !== 'COMPLETED')
+      .every((m) => m.debrief.overview === null && m.debrief.achievements.length === 0),
+  )
+
   // ── brand copy ───────────────────────────────────────────────
   for (const phrase of [
     'WE ARE THE GHOSTS',
@@ -292,10 +382,7 @@ try {
   }
 
   // ── section identifiers ─────────────────────────────────────
-  for (const id of ['01', '02', '03', '04', '05', '06', '07']) {
-    check(`section index ${id}`, visible.includes(id))
-  }
-  for (const id of ['protocol', 'operatives', 'missions', 'lab', 'arsenal', 'record', 'contact']) {
+  for (const id of ['protocol', 'operatives', 'network', 'missions', 'transmissions', 'lab', 'arsenal', 'radar', 'timeline', 'record', 'intel', 'contact']) {
     check(`anchor #${id}`, html.includes(`id="${id}"`))
   }
 
@@ -307,7 +394,7 @@ try {
   check('programming stack present', JSON.stringify(site.arsenal).includes('Python'))
   check('security stack present', JSON.stringify(site.arsenal).includes('CTF Challenges'))
   check('ai stack present', JSON.stringify(site.arsenal).includes('LLMs'))
-  check('nav has 7 entries', site.nav.length === 7)
+  check('nav has 12 entries', site.nav.length === 12, `found ${site.nav.length}`)
   check('projects are placeholders', projectsData.projects.every((p) => p.summary === null))
   check('no invented socials', site.contact.channels.every((c) => c.href === null && c.handle === null))
   check('no invented member socials', team.operatives.every((o) => o.socials.length === 0))

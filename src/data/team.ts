@@ -50,6 +50,8 @@ export type Operative = {
   brief: string
   /** Standalone capability readout revealed inside the dossier. */
   capabilities: string[]
+  /** Where this operative sits in the network map (percentages). */
+  node: { x: number; y: number }
   /** Keyword triple used for the identity labels. */
   traits: [string, string, string]
   image: MediaAsset
@@ -85,6 +87,7 @@ export const operatives: Operative[] = [
     socials: [],
     skills: [],
     signature: 'command',
+    node: { x: 50, y: 12 },
     missions: ['zerosecure-2', 'cyber-ekathon', 'blackout', 'secleaf-2026'],
     published: true,
   },
@@ -104,6 +107,7 @@ export const operatives: Operative[] = [
     socials: [],
     skills: [],
     signature: 'intelligence',
+    node: { x: 14.5, y: 37 },
     missions: ['zerosecure-2', 'cyber-ekathon', 'secleaf-2026'],
     published: true,
   },
@@ -123,6 +127,7 @@ export const operatives: Operative[] = [
     socials: [],
     skills: [],
     signature: 'stealth',
+    node: { x: 85.5, y: 37 },
     missions: ['zerosecure-2', 'secleaf-2026'],
     published: true,
   },
@@ -142,6 +147,7 @@ export const operatives: Operative[] = [
     socials: [],
     skills: [],
     signature: 'adaptive',
+    node: { x: 25, y: 70 },
     missions: ['cyber-ekathon', 'secleaf-2026'],
     published: true,
   },
@@ -161,6 +167,7 @@ export const operatives: Operative[] = [
     socials: [],
     skills: [],
     signature: 'emerging',
+    node: { x: 44, y: 74 },
     missions: ['secleaf-2026'],
     published: true,
   },
@@ -180,6 +187,7 @@ export const operatives: Operative[] = [
     socials: [],
     skills: [],
     signature: 'analysis',
+    node: { x: 92, y: 52 },
     missions: ['secleaf-2026'],
     published: true,
   },

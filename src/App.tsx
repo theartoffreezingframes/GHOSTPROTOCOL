@@ -3,6 +3,8 @@ import { useReducedMotion } from 'motion/react'
 
 import { BootSequence, BOOT_STORAGE_KEY } from './components/BootSequence'
 import { CustomCursor } from './components/CustomCursor'
+import { DossierProvider } from './components/DossierProvider'
+import { EasterEggs } from './components/EasterEggs'
 import { Footer } from './components/Footer'
 import { Nav } from './components/Nav'
 import { About } from './sections/About'
@@ -10,9 +12,15 @@ import { Arsenal } from './sections/Arsenal'
 import { Contact } from './sections/Contact'
 import { Hero } from './sections/Hero'
 import { Missions } from './sections/Missions'
+import { NetworkMap } from './sections/NetworkMap'
 import { Operatives } from './sections/Operatives'
 import { Projects } from './sections/Projects'
+import { RedactedFiles } from './sections/RedactedFiles'
 import { Record } from './sections/Record'
+import { SystemStatus } from './sections/SystemStatus'
+import { ThreatRadar } from './sections/ThreatRadar'
+import { Timeline } from './sections/Timeline'
+import { Transmissions } from './sections/Transmissions'
 
 function readBootFlag() {
   try {
@@ -74,7 +82,7 @@ export default function App() {
   const ready = checked && (booted || skipBoot || Boolean(reduce))
 
   return (
-    <>
+    <DossierProvider>
       <a
         href="#protocol"
         className="sr-only-focusable fixed left-4 top-4 z-[300] border border-neon bg-void px-4 py-2 font-tech text-[0.7rem] tracking-[0.2em] text-neon"
@@ -98,14 +106,21 @@ export default function App() {
         <Hero ready={ready} onNavigate={navigate} />
         <About />
         <Operatives />
+        <NetworkMap />
         <Missions />
+        <Transmissions />
         <Projects />
         <Arsenal />
+        <ThreatRadar />
+        <Timeline />
         <Record />
+        <RedactedFiles />
+        <SystemStatus />
         <Contact />
       </main>
 
       <Footer onNavigate={navigate} />
-    </>
+      <EasterEggs />
+    </DossierProvider>
   )
 }

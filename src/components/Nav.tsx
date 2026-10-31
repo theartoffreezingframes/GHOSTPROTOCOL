@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion, useScroll, useSpring } from 'motion/react'
-import { Menu, X } from 'lucide-react'
+import { ChevronDown, Menu, X } from 'lucide-react'
 
-import { brand, nav } from '../data/site'
+import { brand, nav, primaryNav, secondaryNav } from '../data/site'
 import { EASE_OUT_EXPO } from '../lib/motion'
 import { cn } from '../lib/utils'
 import { Emblem } from './Emblem'
+import { AudioToggle } from './AudioToggle'
 
 type NavProps = {
   /** Called with a section id — App owns the actual scroll so easing stays consistent. */
@@ -18,6 +19,8 @@ export function Nav({ onNavigate, ready }: NavProps) {
   const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [active, setActive] = useState<string>('')
+  const [moreOpen, setMoreOpen] = useState(false)
+  const moreRef = useRef<HTMLDivElement>(null)
   const sheetRef = useRef<HTMLDivElement>(null)
   const toggleRef = useRef<HTMLButtonElement>(null)
   const reduce = useReducedMotion()
@@ -67,11 +70,24 @@ export function Nav({ onNavigate, ready }: NavProps) {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpen(false)
+      if (e.key === 'Escape') {
+        setOpen(false)
+        setMoreOpen(false)
+      }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [])
+
+  // Dismiss the overflow menu on an outside pointer press.
+  useEffect(() => {
+    if (!moreOpen) return
+    const onDown = (event: PointerEvent) => {
+      if (!moreRef.current?.contains(event.target as Node)) setMoreOpen(false)
+    }
+    document.addEventListener('pointerdown', onDown)
+    return () => document.removeEventListener('pointerdown', onDown)
+  }, [moreOpen])
 
   const go = (id: string) => {
     setOpen(false)
@@ -111,7 +127,7 @@ export function Nav({ onNavigate, ready }: NavProps) {
                   <span className="text-neon"> </span>
                   {brand.nameParts[1]}
                 </span>
-                <span className="font-tech mt-1 hidden text-[0.66rem] tracking-[0.22em] text-mute sm:block">
+                <span className="font-tech mt-1 hidden text-[0.6rem] tracking-[0.2em] text-mute xl:block">
                   {brand.classification}
                 </span>
               </span>
@@ -119,7 +135,7 @@ export function Nav({ onNavigate, ready }: NavProps) {
 
             {/* desktop links */}
             <nav aria-label="Primary" className="hidden items-center gap-1 lg:flex">
-              {nav.map((item) => {
+              {primaryNav.map((item) => {
                 const isActive = active === item.id
                 return (
                   <a
@@ -130,12 +146,14 @@ export function Nav({ onNavigate, ready }: NavProps) {
                       go(item.id)
                     }}
                     className={cn(
-                      'group relative px-2 py-2 font-tech text-[0.66rem] tracking-[0.16em] transition-colors duration-300 xl:px-3 xl:text-[0.7rem] xl:tracking-[0.18em]',
+                      'group relative px-1.5 py-2 font-tech text-[0.6rem] tracking-[0.1em] transition-colors duration-300 xl:px-2.5 xl:text-[0.66rem] xl:tracking-[0.14em]',
                       isActive ? 'text-neon' : 'text-mute hover:text-bone',
                     )}
                     aria-current={isActive ? 'true' : undefined}
                   >
-                    <span className="mr-1.5 text-[0.66rem] text-mute/75 group-hover:text-neon/70">{item.index}</span>
+                    <span className="mr-1 hidden text-[0.55rem] text-mute/75 group-hover:text-neon/70 xl:mr-1.5 xl:inline">
+                      {item.index}
+                    </span>
                     {item.short.toUpperCase()}
                     <span
                       className={cn(
@@ -147,13 +165,82 @@ export function Nav({ onNavigate, ready }: NavProps) {
                   </a>
                 )
               })}
+
+              {/* overflow — 12 sections cannot fit in one row without
+                  pushing the identity and CTA off screen */}
+              <div ref={moreRef} className="relative hidden lg:block">
+                <button
+                  type="button"
+                  onClick={() => setMoreOpen((value) => !value)}
+                  aria-expanded={moreOpen}
+                  {...(moreOpen ? { 'aria-controls': 'more-sections' } : {})}
+                  className={cn(
+                    'group relative flex items-center gap-1 px-1.5 py-2 font-tech text-[0.6rem] tracking-[0.1em] transition-colors duration-300 xl:gap-1.5 xl:px-2.5 xl:text-[0.66rem] xl:tracking-[0.14em]',
+                    secondaryNav.some((item) => item.id === active)
+                      ? 'text-neon'
+                      : 'text-mute hover:text-bone',
+                  )}
+                >
+                  SECTIONS
+                  <ChevronDown
+                    size={10}
+                    className={cn('transition-transform duration-300', moreOpen && 'rotate-180')}
+                    aria-hidden="true"
+                  />
+                  <span
+                    className={cn(
+                      'absolute inset-x-2 -bottom-0.5 h-px origin-left bg-neon transition-transform duration-500 xl:inset-x-3',
+                      secondaryNav.some((item) => item.id === active) ? 'scale-x-100' : 'scale-x-0',
+                    )}
+                    aria-hidden="true"
+                  />
+                </button>
+
+                <AnimatePresence>
+                  {moreOpen && (
+                    <motion.div
+                      id="more-sections"
+                      initial={{ opacity: 0, y: -6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -6 }}
+                      transition={{ duration: reduce ? 0 : 0.28, ease: EASE_OUT_EXPO }}
+                      className="absolute right-0 top-full mt-2 w-64 border border-line-soft bg-void/97 p-1.5 backdrop-blur-xl"
+                    >
+                      {secondaryNav.map((item) => {
+                        const isActive = active === item.id
+                        return (
+                          <a
+                            key={item.id}
+                            href={`#${item.id}`}
+                            onClick={(e) => {
+                              e.preventDefault()
+                              setMoreOpen(false)
+                              go(item.id)
+                            }}
+                            className={cn(
+                              'flex items-baseline gap-3 px-2.5 py-2 font-tech text-[0.62rem] tracking-[0.14em] transition-colors',
+                              isActive ? 'bg-neon/[0.06] text-neon' : 'text-mute hover:bg-white/[0.03] hover:text-bone',
+                            )}
+                            aria-current={isActive ? 'true' : undefined}
+                          >
+                            <span className="text-[0.55rem] text-mute/50">{item.index}</span>
+                            {item.label.toUpperCase()}
+                          </a>
+                        )
+                      })}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </nav>
 
             <div className="flex items-center gap-2">
+              <AudioToggle className="hidden sm:flex" />
+
               <button
                 type="button"
                 onClick={() => go('contact')}
-                className="group hidden items-center gap-2 whitespace-nowrap border border-line px-3 py-2.5 font-tech text-[0.66rem] tracking-[0.18em] text-bone transition-colors duration-300 hover:border-neon/60 hover:text-neon xl:inline-flex"
+                className="group hidden items-center gap-2 whitespace-nowrap border border-line px-2.5 py-2.5 font-tech text-[0.6rem] tracking-[0.14em] text-bone transition-colors duration-300 hover:border-neon/60 hover:text-neon xl:inline-flex"
               >
                 <span className="h-1 w-1 rounded-full bg-neon animate-pulse-dot" aria-hidden="true" />
                 ESTABLISH CONNECTION

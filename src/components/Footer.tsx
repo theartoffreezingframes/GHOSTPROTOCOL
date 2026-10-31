@@ -73,7 +73,11 @@ export function Footer({ onNavigate }: FooterProps) {
         </div>
 
         {/* oversized wordmark */}
-        <div className="relative select-none overflow-hidden py-8 sm:py-10" aria-hidden="true">
+        <div
+          className="relative select-none overflow-hidden py-8 sm:py-10"
+          aria-hidden="true"
+          data-egg-tap
+        >
           <motion.p
             className="font-display w-full whitespace-nowrap text-center text-[clamp(2.2rem,11.4vw,13rem)] font-medium uppercase leading-[0.78] tracking-[-0.055em] text-transparent"
             style={{
