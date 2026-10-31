@@ -10,7 +10,15 @@ import {
 } from 'motion/react'
 import { ArrowUpRight, Crosshair, Lock, Plus, ScanFace } from 'lucide-react'
 
-import { activeOperatives, operativeMeta, type Operative } from '../data/team'
+import {
+  activeOperatives,
+  isSoloAssignment,
+  missionHistory,
+  missionHistoryCopy,
+  operativeMeta,
+  type Operative,
+  type OperativeMissionRecord,
+} from '../data/team'
 import { imageFallback, imageSrcSet } from '../lib/media'
 import { EASE_OUT_EXPO } from '../lib/motion'
 import { cn } from '../lib/utils'
@@ -257,6 +265,8 @@ function OperativeCard({ operative, index }: { operative: Operative; index: numb
                   <p className="font-tech mb-2 text-[0.66rem] tracking-[0.22em] text-neon/70">PROFILE</p>
                   <p className="text-[0.8rem] leading-relaxed text-mute">{operative.profile}</p>
 
+                  <MissionHistory operative={operative} />
+
                   <p className="font-tech mb-2 mt-4 text-[0.66rem] tracking-[0.22em] text-neon/70">CHARACTER PROFILE</p>
                   <ul className="space-y-1.5">
                     {operative.capabilities.map((capability) => (
@@ -347,5 +357,121 @@ function OperativeCard({ operative, index }: { operative: Operative; index: numb
         </span>
       </div>
     </motion.article>
+  )
+}
+
+
+/**
+ * MISSION HISTORY — derived entirely from the participation ids stored on the
+ * operative and the mission records in src/data/missions.ts. No mission name
+ * or status is written here, so a status change propagates automatically.
+ */
+function MissionHistory({ operative }: { operative: Operative }) {
+  const history = missionHistory(operative)
+
+  return (
+    <section aria-label={missionHistoryCopy.heading} className="mt-5">
+      <div className="flex items-center gap-2">
+        <p className="font-tech text-[0.66rem] tracking-[0.22em] text-neon/70">{missionHistoryCopy.heading}</p>
+        <span className="h-px flex-1 bg-line-soft" aria-hidden="true" />
+        <span className="font-tech text-[0.6rem] tracking-[0.18em] text-mute/60">
+          {missionHistoryCopy.countLabel(history.length)}
+        </span>
+      </div>
+      <p className="font-tech mt-1.5 text-[0.6rem] leading-relaxed tracking-[0.16em] text-mute/55">
+        {missionHistoryCopy.support}
+      </p>
+
+      {history.length > 0 ? (
+        <ul className="mt-3 space-y-1.5">
+          {history.map((record) => (
+            <MissionEntry key={record.id} record={record} operative={operative} />
+          ))}
+        </ul>
+      ) : (
+        <p className="font-tech mt-3 border border-line-soft px-2.5 py-2 text-[0.62rem] tracking-[0.18em] text-mute/60">
+          {missionHistoryCopy.empty}
+        </p>
+      )}
+    </section>
+  )
+}
+
+function MissionEntry({ record, operative }: { record: OperativeMissionRecord; operative: Operative }) {
+  const solo = record.solo && isSoloAssignment(operative, record.id)
+
+  return (
+    <li
+      className={cn(
+        'relative border px-2.5 py-2 transition-colors duration-300',
+        solo ? 'border-neon/35 bg-neon/[0.045]' : 'border-line-soft bg-white/[0.012]',
+        record.active && !solo && 'border-neon/20',
+      )}
+    >
+      {/* left active rail */}
+      <span
+        className={cn(
+          'absolute inset-y-0 left-0 w-px',
+          record.active ? 'bg-neon/70' : 'bg-emerald/40',
+        )}
+        aria-hidden="true"
+      />
+
+      <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+        <span className="font-tech text-[0.6rem] tracking-[0.16em] text-mute/55">[{record.number}]</span>
+        <span className="font-tech flex-1 text-[0.66rem] leading-snug tracking-[0.1em] text-bone/90">
+          {record.title}
+        </span>
+      </div>
+
+      <div className="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-1">
+        <span
+          className={cn(
+            'font-tech inline-flex items-center gap-1.5 text-[0.58rem] tracking-[0.16em]',
+            record.active ? 'text-neon' : 'text-emerald',
+          )}
+        >
+          <span
+            className={cn(
+              'h-1 w-1 shrink-0 rounded-full',
+              record.active ? 'bg-neon animate-pulse-dot' : 'bg-emerald',
+            )}
+            aria-hidden="true"
+          />
+          {record.statusLabel}
+        </span>
+        <span className="font-tech text-[0.58rem] tracking-[0.16em] text-mute/45" aria-hidden="true">
+          //
+        </span>
+        <span className="font-tech text-[0.58rem] tracking-[0.16em] text-mute/60">
+          {missionHistoryCopy.participation}
+        </span>
+
+        {solo && (
+          <span className="font-tech ml-auto inline-flex items-center gap-1 border border-neon/45 px-1.5 py-0.5 text-[0.55rem] tracking-[0.16em] text-neon">
+            <Lock size={7} aria-hidden="true" />
+            {missionHistoryCopy.soloLabel}
+          </span>
+        )}
+      </div>
+
+      {solo && (
+        <dl className="mt-2 space-y-1 border-t border-neon/20 pt-2">
+          <SoloRow label={missionHistoryCopy.typeLabel} value={missionHistoryCopy.soloLabel} accent />
+          <SoloRow label={missionHistoryCopy.assignedLabel} value={operative.codename} accent />
+        </dl>
+      )}
+    </li>
+  )
+}
+
+function SoloRow({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
+  return (
+    <div className="flex items-baseline justify-between gap-2">
+      <dt className="font-tech text-[0.55rem] tracking-[0.16em] text-mute/55">{label}</dt>
+      <dd className={cn('font-tech text-[0.58rem] tracking-[0.14em]', accent ? 'text-neon' : 'text-bone/80')}>
+        {value}
+      </dd>
+    </div>
   )
 }

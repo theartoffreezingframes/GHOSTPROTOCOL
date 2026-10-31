@@ -23,6 +23,7 @@
  * change their spelling.
  */
 import { MEDIA, type MediaAsset } from '../lib/media'
+import { missions, statusDisplay, type Mission, type MissionId } from './missions'
 
 export type SocialPlatform = 'github' | 'linkedin' | 'instagram' | 'x' | 'email' | 'website'
 
@@ -59,6 +60,12 @@ export type Operative = {
   signature: OperativeSignature
   /** Set false to withhold a record without deleting it. */
   published: boolean
+  /**
+   * Confirmed operations this operative took part in, by mission id.
+   * Mission name, status and solo classification are looked up from
+   * src/data/missions.ts — never typed here.
+   */
+  missions: MissionId[]
 }
 
 export const operatives: Operative[] = [
@@ -78,6 +85,7 @@ export const operatives: Operative[] = [
     socials: [],
     skills: [],
     signature: 'command',
+    missions: ['zerosecure-2', 'cyber-ekathon', 'blackout', 'secleaf-2026'],
     published: true,
   },
   {
@@ -96,6 +104,7 @@ export const operatives: Operative[] = [
     socials: [],
     skills: [],
     signature: 'intelligence',
+    missions: ['zerosecure-2', 'cyber-ekathon', 'secleaf-2026'],
     published: true,
   },
   {
@@ -114,6 +123,7 @@ export const operatives: Operative[] = [
     socials: [],
     skills: [],
     signature: 'stealth',
+    missions: ['zerosecure-2', 'secleaf-2026'],
     published: true,
   },
   {
@@ -132,6 +142,7 @@ export const operatives: Operative[] = [
     socials: [],
     skills: [],
     signature: 'adaptive',
+    missions: ['cyber-ekathon', 'secleaf-2026'],
     published: true,
   },
   {
@@ -150,6 +161,7 @@ export const operatives: Operative[] = [
     socials: [],
     skills: [],
     signature: 'emerging',
+    missions: ['secleaf-2026'],
     published: true,
   },
   {
@@ -168,9 +180,76 @@ export const operatives: Operative[] = [
     socials: [],
     skills: [],
     signature: 'analysis',
+    missions: ['secleaf-2026'],
     published: true,
   },
 ]
+
+/* ── Mission history derivation ──────────────────────────────────────
+   Operatives store only mission ids. Everything the dossier shows —
+   name, current status, solo classification, count — is derived here,
+   so changing a status in missions.ts updates every dossier at once.  */
+
+export type OperativeMissionRecord = {
+  id: MissionId
+  number: string
+  codename: string
+  title: string
+  status: Mission['status']
+  statusLabel: string
+  active: boolean
+  solo: boolean
+  /** Operatives sharing this mission (used for the assigned-operator line). */
+  assignedCount: number
+}
+
+const missionById = new Map(missions.map((mission) => [mission.id, mission]))
+
+function buildMissionHistory(operative: Operative): OperativeMissionRecord[] {
+  return operative.missions
+    .map((id) => missionById.get(id))
+    .filter((mission): mission is Mission => Boolean(mission))
+    .map((mission) => {
+      const display = statusDisplay[mission.status]
+      return {
+        id: mission.id,
+        number: mission.number,
+        codename: mission.codename,
+        title: mission.title,
+        status: mission.status,
+        statusLabel: display.label,
+        active: display.active,
+        solo: mission.operationType === 'SOLO',
+        assignedCount: operatives.filter((other) => other.missions.includes(mission.id)).length,
+      }
+    })
+}
+
+/** Confirmed mission history for one operative, in official mission order. */
+export function missionHistory(operative: Operative): OperativeMissionRecord[] {
+  return buildMissionHistory(operative)
+}
+
+/** True when this operative is the only one assigned to that mission. */
+export function isSoloAssignment(operative: Operative, id: MissionId): boolean {
+  return (
+    operatives.filter((other) => other.missions.includes(id)).length === 1 &&
+    operative.missions.includes(id)
+  )
+}
+
+export const missionHistoryCopy = {
+  heading: 'MISSION HISTORY',
+  support: 'CLASSIFIED RECORD OF CONFIRMED OPERATIONAL PARTICIPATION.',
+  empty: 'NO CONFIRMED OPERATION ON FILE',
+  soloLabel: 'SOLO OPERATION',
+  typeLabel: 'MISSION TYPE',
+  assignedLabel: 'ASSIGNED OPERATIVE',
+  accessLabel: 'ACCESS',
+  accessValue: 'CLASSIFIED',
+  participation: 'CONFIRMED',
+  countLabel: (n: number) => `${String(n).padStart(2, '0')} CONFIRMED`,
+}
 
 /** Published records only — the UI never sees withheld entries. */
 export const activeOperatives = operatives.filter((operative) => operative.published)

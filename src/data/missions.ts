@@ -17,9 +17,10 @@
  * is invented — fill it in when it is cleared.
  */
 import { MEDIA, type MediaAsset } from '../lib/media'
-import { operativeMeta } from './team'
 
 export type MissionStatus = 'COMPLETED' | 'ONGOING' | 'UPCOMING'
+
+export type MissionId = 'zerosecure-2' | 'cyber-ekathon' | 'blackout' | 'secleaf-2026'
 
 export type MissionField = {
   label: string
@@ -28,6 +29,8 @@ export type MissionField = {
 }
 
 export type Mission = {
+  /** Stable identifier — operatives reference this, never the display name. */
+  id: MissionId
   number: string
   codename: string
   title: string
@@ -38,6 +41,8 @@ export type Mission = {
   venue: string | null
   summary: string | null
   image: MediaAsset | null
+  /** SOLO = a single operative was assigned. Derived labels read from this. */
+  operationType: 'SOLO' | 'TEAM'
   /** Extra narrative blocks revealed in the expandable record. */
   dossier: MissionField[]
   /** Results / achievements — only list what can be verified. */
@@ -78,6 +83,8 @@ export const statusDisplay: Record<
 
 export const missions: Mission[] = [
   {
+    id: 'zerosecure-2',
+    operationType: 'TEAM',
     number: '001',
     codename: 'ZEROSECURE',
     title: 'OPERATION ZEROSECURE 2.0',
@@ -100,6 +107,8 @@ export const missions: Mission[] = [
     published: true,
   },
   {
+    id: 'cyber-ekathon',
+    operationType: 'TEAM',
     number: '002',
     codename: 'EKATHON',
     title: 'OPERATION CYBER EKATHON',
@@ -122,6 +131,8 @@ export const missions: Mission[] = [
     published: true,
   },
   {
+    id: 'blackout',
+    operationType: 'SOLO',
     number: '003',
     codename: 'BLACKOUT',
     title: 'OPERATION BLACKOUT',
@@ -136,7 +147,6 @@ export const missions: Mission[] = [
       { label: 'DATE', value: null },
       { label: 'VENUE', value: null },
       { label: 'OBJECTIVES', value: null },
-      { label: 'OPERATIVES ASSIGNED', value: operativeMeta.count },
       { label: 'ACCESS LEVEL', value: 'CLASSIFIED' },
     ],
     outcomes: [],
@@ -145,6 +155,8 @@ export const missions: Mission[] = [
     published: true,
   },
   {
+    id: 'secleaf-2026',
+    operationType: 'TEAM',
     number: '004',
     codename: 'SECLEAF',
     title: 'SECLEAF 2026',
@@ -159,7 +171,6 @@ export const missions: Mission[] = [
       { label: 'DATE', value: null },
       { label: 'VENUE', value: null },
       { label: 'OBJECTIVES', value: null },
-      { label: 'OPERATIVES ASSIGNED', value: operativeMeta.count },
       { label: 'ACCESS LEVEL', value: 'CLASSIFIED' },
     ],
     outcomes: [],
@@ -198,16 +209,18 @@ export const blackoutCopy = {
     { label: 'MISSION STATUS', value: statusDisplay[mission.status].label },
     { label: 'OPERATION', value: mission.codename },
     { label: 'ACCESS', value: 'CLASSIFIED' },
-    { label: 'OPERATIVES', value: operativeMeta.count },
   ],
-  operativesAssigned: (mission: Mission) =>
-    mission.dossier.find((field) => field.label === 'OPERATIVES ASSIGNED')?.value ?? '—',
   strip: {
     file: (mission: Mission) => `FILE ${mission.number} // ${mission.codename}`,
     state: (mission: Mission) =>
       statusDisplay[mission.status].active ? 'OPERATION ACTIVE · SIGNAL OPEN' : 'OPERATION CLOSED · ARCHIVED',
   },
   placeholder: 'AWAITING INTEL',
+}
+
+/** Operatives assigned to a mission, resolved from the participation records. */
+export function missionOperatives(mission: Mission, operatives: { missions: MissionId[] }[]) {
+  return operatives.filter((operative) => operative.missions.includes(mission.id))
 }
 
 export const missionMeta = {

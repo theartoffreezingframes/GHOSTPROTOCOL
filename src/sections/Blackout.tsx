@@ -9,6 +9,7 @@ import {
 import { AlertTriangle, Fingerprint, Lock, Radio, X } from 'lucide-react'
 
 import { blackoutCopy, statusDisplay, type Mission } from '../data/missions'
+import { activeOperatives } from '../data/team'
 import { imageFallback, imageSrcSet } from '../lib/media'
 import { EASE_OUT_EXPO } from '../lib/motion'
 import { cn } from '../lib/utils'
@@ -30,6 +31,8 @@ export function BlackoutMission({ mission }: { mission: Mission }) {
   const reduce = useReducedMotion()
   const status = statusDisplay[mission.status]
   const statusRows = blackoutCopy.status(mission)
+  const assigned = activeOperatives.filter((operative) => operative.missions.includes(mission.id))
+  const assignedLabel = assigned.map((operative) => operative.codename).join(' · ')
   const [decrypted, setDecrypted] = useState(false)
   const [granted, setGranted] = useState(false)
   const sectionRef = useRef<HTMLDivElement>(null)
@@ -284,7 +287,7 @@ export function BlackoutMission({ mission }: { mission: Mission }) {
                     <dt className="font-tech text-[0.66rem] tracking-[0.18em] text-mute/80">{row.label}</dt>
                     <dd
                       className={cn(
-                        'font-tech text-[0.7rem] tracking-[0.16em]',
+                        'font-tech text-right text-[0.7rem] tracking-[0.16em]',
                         row.value === 'CLASSIFIED' || row.value === status.label ? 'text-neon' : 'text-bone/85',
                       )}
                     >
@@ -292,6 +295,19 @@ export function BlackoutMission({ mission }: { mission: Mission }) {
                     </dd>
                   </div>
                 ))}
+
+                {mission.operationType === 'SOLO' && (
+                  <div className="mt-3 border-t border-neon/20 pt-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <dt className="font-tech text-[0.66rem] tracking-[0.18em] text-mute/80">MISSION TYPE</dt>
+                      <dd className="font-tech text-[0.7rem] tracking-[0.16em] text-neon">SOLO OPERATION</dd>
+                    </div>
+                    <div className="mt-2 flex items-center justify-between gap-3">
+                      <dt className="font-tech text-[0.66rem] tracking-[0.18em] text-mute/80">ASSIGNED OPERATIVE</dt>
+                      <dd className="font-tech text-[0.7rem] tracking-[0.16em] text-bone/85">{assignedLabel || '—'}</dd>
+                    </div>
+                  </div>
+                )}
               </dl>
 
               <div className="mt-4 flex items-center gap-2 border-t border-neon/10 pt-3">
@@ -412,7 +428,7 @@ export function BlackoutMission({ mission }: { mission: Mission }) {
             {blackoutCopy.strip.state(mission)}
           </span>
           <span className="font-tech hidden text-[0.7rem] tracking-[0.2em] text-mute/75 sm:inline">
-            OPERATIVES ASSIGNED // {blackoutCopy.operativesAssigned(mission)}
+            OPERATIVES ASSIGNED // {assignedLabel || '—'}
           </span>
         </div>
       </motion.article>

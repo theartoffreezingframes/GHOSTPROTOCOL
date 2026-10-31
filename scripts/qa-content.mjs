@@ -147,6 +147,55 @@ try {
     }
   }
 
+  // ── mission participation matrix ─────────────────────────────
+  const matrix = {
+    GHOST: ['zerosecure-2', 'cyber-ekathon', 'blackout', 'secleaf-2026'],
+    SHADOW: ['zerosecure-2', 'cyber-ekathon', 'secleaf-2026'],
+    PHANTOM: ['zerosecure-2', 'secleaf-2026'],
+    SPECTRE: ['cyber-ekathon', 'secleaf-2026'],
+    CIPHER: ['secleaf-2026'],
+    MAVERICK: ['secleaf-2026'],
+  }
+  for (const [codename, expected] of Object.entries(matrix)) {
+    const record = team.operatives.find((o) => o.codename === codename)
+    check(`participation ids: ${codename}`, JSON.stringify(record?.missions) === JSON.stringify(expected), String(record?.missions))
+    const derived = team.missionHistory(record)
+    check(`mission history: ${codename} has ${expected.length}`, derived.length === expected.length, `found ${derived.length}`)
+    check(
+      `mission history names match ids: ${codename}`,
+      derived.every((entry) => missionsData.missions.find((m) => m.id === entry.id)?.title === entry.title),
+    )
+  }
+  // BLACKOUT is solo, GHOST-only
+  const blackout = missionsData.missions.find((m) => m.id === 'blackout')
+  check('blackout is a SOLO operation', blackout.operationType === 'SOLO')
+  const blackoutHolders = team.operatives.filter((o) => o.missions.includes('blackout')).map((o) => o.codename)
+  check('blackout assigned to GHOST only', JSON.stringify(blackoutHolders) === '["GHOST"]', blackoutHolders.join(','))
+  check(
+    'blackout never appears in another history',
+    team.operatives.filter((o) => o.codename !== 'GHOST').every((o) => !team.missionHistory(o).some((m) => m.id === 'blackout')),
+  )
+  check(
+    'solo flag resolves for GHOST only',
+    team.operatives.filter((o) => team.isSoloAssignment(o, 'blackout')).map((o) => o.codename).join(',') === 'GHOST',
+  )
+  // SECLEAF 2026 is on all six
+  const secleafHolders = team.operatives.filter((o) => o.missions.includes('secleaf-2026'))
+  check('secleaf 2026 on all six operatives', secleafHolders.length === 6, `found ${secleafHolders.length}`)
+  // every mission id is real and unique
+  check('mission ids unique', new Set(missionsData.missions.map((m) => m.id)).size === 4)
+  check(
+    'participation ids all resolve',
+    team.operatives.every((o) => o.missions.every((id) => missionsData.missions.some((m) => m.id === id))),
+  )
+  // derived status must track the mission record
+  check(
+    'dossier status mirrors mission status',
+    team.operatives.every((o) =>
+      team.missionHistory(o).every((entry) => entry.status === missionsData.missions.find((m) => m.id === entry.id).status),
+    ),
+  )
+
   // ── mission names + statuses ─────────────────────────────────
   const byNum = (n) => missionsData.missions.find((m) => m.number === n)
   check('mission 001 name', byNum('001').title === 'OPERATION ZEROSECURE 2.0')
@@ -190,6 +239,14 @@ try {
   check('blackout encrypted line 1', missionsData.blackoutCopy.encrypted[0] === 'MISSION DETAILS ENCRYPTED.')
   check('blackout encrypted line 2', missionsData.blackoutCopy.encrypted[1] === 'AWAITING AUTHORIZATION.')
 
+  // dossier copy lives behind the expand control, so assert it at data level
+  check('mission history heading copy', team.missionHistoryCopy.heading === 'MISSION HISTORY')
+  check(
+    'mission history support copy',
+    team.missionHistoryCopy.support === 'CLASSIFIED RECORD OF CONFIRMED OPERATIONAL PARTICIPATION.',
+  )
+  check('solo label copy', team.missionHistoryCopy.soloLabel === 'SOLO OPERATION')
+
   // ── brand copy ───────────────────────────────────────────────
   for (const phrase of [
     'WE ARE THE GHOSTS',
@@ -226,6 +283,7 @@ try {
     'GHOST_PROTOCOL_',
     'SECLEAF 2026',
     'DIFFERENT SPECIALTIES. ONE OBJECTIVE. NO IMPOSSIBLE MISSIONS.',
+
     'THINK BEYOND LIMITS.',
     'OPERATE IN THE SHADOWS.',
     'BUILD THE IMPOSSIBLE.',

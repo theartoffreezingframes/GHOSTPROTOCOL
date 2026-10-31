@@ -92,7 +92,7 @@ No backend, database or API keys. Static output, deployable anywhere.
 │   └── site.webmanifest        PWA manifest
 ├── scripts/
 │   ├── optimize-images.mjs     raw photos → /public/media + icons + OG card
-│   └── qa-content.mjs          server-render QA: 186 content/markup assertions
+│   └── qa-content.mjs          server-render QA: 218 content/markup assertions
 └── src/
     ├── App.tsx                 page composition, boot gating, single scroll owner
     ├── index.css               design tokens, component classes, keyframes
@@ -213,6 +213,33 @@ footnote says so on the page.
 Empty arrays render as `NOT ON RECORD` / `NO PUBLIC CHANNEL ON FILE` — never a
 placeholder account.
 
+### Mission history — derived, never duplicated
+
+Each operative stores only mission **ids**:
+
+```ts
+missions: ['zerosecure-2', 'cyber-ekathon', 'blackout', 'secleaf-2026']  // GHOST
+```
+
+`missionHistory(operative)` resolves those ids against `src/data/missions.ts` and returns
+name, number, current status, active flag and solo classification. `isSoloAssignment()`
+checks whether exactly one operative holds that mission. Nothing in the UI types a
+mission name or status twice, so **changing a mission's `status` updates the archive and
+every operative dossier in the same render**.
+
+Current confirmed participation:
+
+| Mission | GHOST | SHADOW | PHANTOM | SPECTRE | CIPHER | MAVERICK |
+| --- | --- | --- | --- | --- | --- | --- |
+| ZeroSecure 2.0 | yes | yes | yes | — | — | — |
+| Cyber Ekathon | yes | yes | — | yes | — | — |
+| BLACKOUT (solo) | yes | — | — | — | — | — |
+| SECLEAF 2026 | yes | yes | yes | yes | yes | yes |
+
+`data/team.ts` imports `data/missions.ts` (not the reverse), so there is no import cycle.
+Operatives are the only thing that references missions; mission-side operatives-assigned
+readouts are computed in the components from `activeOperatives`.
+
 ### Operations — `src/data/missions.ts`
 
 The archive holds four records:
@@ -221,7 +248,7 @@ The archive holds four records:
 | --- | --- | --- |
 | 001 | OPERATION ZEROSECURE 2.0 | COMPLETED |
 | 002 | OPERATION CYBER EKATHON | COMPLETED |
-| 003 | OPERATION BLACKOUT | ONGOING |
+| 003 | OPERATION BLACKOUT | ONGOING (SOLO — GHOST) |
 | 004 | SECLEAF 2026 | ONGOING |
 
 Change a `status` and everything follows — the badge, the colour tone, the telemetry
@@ -235,6 +262,9 @@ archive       = missions.filter(m => m.published !== false)
 featureMission = archive.find(m => m.feature)   // current: BLACKOUT
 archiveRows   = the remaining records
 ```
+
+Each mission also carries a stable `id` and an `operationType` (`SOLO` or `TEAM`), which the
+dossier mission history resolves against.
 
 `feature: true` marks the record that renders as the full-bleed classified centrepiece;
 everything else renders as an archive row that shifts to the live/briefing treatment
@@ -326,9 +356,10 @@ element jumped past by a fast scroll may never intersect at all. Therefore:
 npm run qa
 ```
 
-Server-renders every section and asserts 186 requirements: all six identities, the six
+Server-renders every section and asserts 218 requirements: all six identities, the six
 profile descriptions reproduced verbatim, unique portrait files present on disk, the four
-missions with their exact statuses, required copy, forbidden strings (including
+missions with their exact statuses, the exact mission-participation matrix (including
+BLACKOUT being GHOST-only and solo), required copy, forbidden strings (including
 `BIDBOSS`), absence of invented socials/awards/dates, `alt`/lazy/dimension hygiene,
 manifest validity, and SEO metadata.
 
