@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Ghost Protocol emblem">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#8bff6a"/>
+      <stop offset="45%" stop-color="#39ff14"/>
+      <stop offset="100%" stop-color="#00c853"/>
+    </linearGradient>
+    <clipPath id="ghost">
+      <path d="M19 45V28.5C19 18.8 24.9 12.5 32 12.5s13 6.3 13 16V45l-4.6-3.9-4.3 4.6L32 41.5l-4.1 4.2-4.3-4.6L19 45Z"/>
+    </clipPath>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="#050706"/>
+  <path d="M32 5.5 55 18.5v27L32 58.5 9 45.5v-27L32 5.5Z" fill="none" stroke="#0f2a1a" stroke-width="1.5"/>
+  <path d="M32 9.5 51.5 20.6v22.8L32 54.5 12.5 43.4V20.6L32 9.5Z" fill="none" stroke="#39ff14" stroke-opacity=".55" stroke-width="1.2" stroke-dasharray="3 4"/>
+  <path d="M19 45V28.5C19 18.8 24.9 12.5 32 12.5s13 6.3 13 16V45l-4.6-3.9-4.3 4.6L32 41.5l-4.1 4.2-4.3-4.6L19 45Z" fill="url(#g)"/>
+  <g clip-path="url(#ghost)" fill="#050706">
+    <rect x="25.2" y="25.5" width="3.9" height="7.6" rx="1.5"/>
+    <rect x="34.9" y="25.5" width="3.9" height="7.6" rx="1.5"/>
+    <rect x="15" y="33.2" width="34" height="2.1"/>
+    <rect x="15" y="37.8" width="20" height="1.5"/>
+  </g>
+  <rect x="37.5" y="33.2" width="11.5" height="2.1" fill="#050706"/>
+  <rect x="9" y="41.5" width="3.4" height="3.4" fill="#39ff14"/>
+  <rect x="51.6" y="19.1" width="3.4" height="3.4" fill="#00c853" fill-opacity=".8"/>
+</svg>
