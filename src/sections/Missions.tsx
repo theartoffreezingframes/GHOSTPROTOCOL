@@ -1,0 +1,549 @@
+import { useCallback, useEffect, useId, useMemo, useState } from 'react'
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
+import { Archive, Check, ChevronDown, FileLock2, MapPin, Radio, ScanLine } from 'lucide-react'
+
+import {
+  archiveRows,
+  debriefCopy,
+  featureMission,
+  missionMeta,
+  statusCounts,
+  statusDisplay,
+  type Mission,
+} from '../data/missions'
+import { operativesForMission } from '../lib/model'
+import { imageFallback, imageSrcSet } from '../lib/media'
+import { EASE_OUT_EXPO } from '../lib/motion'
+import { cn } from '../lib/utils'
+import { Reveal } from '../components/Reveal'
+import { SectionHeading } from '../components/SectionHeading'
+import { StatusPill } from '../components/StatusPill'
+import { BlackoutMission } from './Blackout'
+import { EMPTY_FILTERS, MissionSearch, filterMissions } from '../components/MissionSearch'
+import { FOCUS_MISSIONS_EVENT } from '../lib/events'
+
+export function Missions() {
+  const [filters, setFilters] = useState(EMPTY_FILTERS)
+
+  const matched = useMemo(() => filterMissions(filters), [filters])
+  const filtering =
+    filters.query.trim() !== '' ||
+    filters.status !== 'ALL' ||
+    filters.operative !== 'ALL' ||
+    filters.type !== 'ALL'
+
+  /**
+   * Filtered views of the archive. While a query is active everything
+   * renders as a standard record row so nothing matching is hidden
+   * inside the centrepiece treatment.
+   */
+  const completed = useMemo(
+    () =>
+      matched.filter(
+        (m) => m.status === 'COMPLETED' && (filtering || m !== featureMission),
+      ),
+    [matched, filtering],
+  )
+  const live = useMemo(
+    () => matched.filter((m) => m.status === 'ONGOING' && (filtering || m !== featureMission)),
+    [matched, filtering],
+  )
+  // Check the *unfiltered* match set, not `live` (which deliberately
+  // excludes the centrepiece).
+  const showFeature = !filtering && matched.some((m) => m.id === featureMission.id)
+
+  const archivedTotal = String(statusCounts.completed).padStart(2, '0')
+  const liveTotal = String(statusCounts.active).padStart(2, '0')
+
+  /** Command palette → open this section already scoped to one mission. */
+  const focusFromEvent = useCallback((event: Event) => {
+    const detail = (event as CustomEvent<{ missionId?: string }>).detail
+    const missionId = detail?.missionId
+    if (!missionId) {
+      setFilters(EMPTY_FILTERS)
+      return
+    }
+    const mission = archiveRows.find((row) => row.id === missionId) ?? featureMission
+    setFilters({
+      ...EMPTY_FILTERS,
+      query: mission.title,
+    })
+  }, [])
+
+  useEffect(() => {
+    const handler = (event: Event) => focusFromEvent(event)
+    window.addEventListener(FOCUS_MISSIONS_EVENT, handler)
+    return () => window.removeEventListener(FOCUS_MISSIONS_EVENT, handler)
+  }, [focusFromEvent])
+
+  return (
+    <section
+      id="missions"
+      aria-labelledby="missions-heading"
+      className="relative overflow-hidden border-t border-line-soft bg-abyss py-24 sm:py-32 lg:py-40"
+    >
+      <div className="pointer-events-none absolute inset-0 -z-0" aria-hidden="true">
+        <div className="absolute inset-0 grid-bg opacity-40" />
+        <div className="absolute right-0 top-1/3 h-[34rem] w-[min(34rem,86vw)] rounded-full bg-emerald/[0.05] blur-[140px]" />
+      </div>
+
+      <div className="container-x relative z-10">
+        <SectionHeading
+          id="missions-heading"
+          index="03"
+          label={missionMeta.label}
+          lines={missionMeta.heading}
+          aside={
+            <span className="font-tech ml-auto hidden items-center gap-2 text-[0.7rem] tracking-[0.22em] text-mute/70 md:flex">
+              <Archive size={9} aria-hidden="true" />
+              ARCHIVE // {archivedTotal} COMPLETE · {liveTotal} LIVE
+            </span>
+          }
+        >
+          <Reveal delay={0.2}>
+            <p className="text-[0.95rem] leading-relaxed text-mute">{missionMeta.note}</p>
+          </Reveal>
+        </SectionHeading>
+
+        <MissionSearch filters={filters} onChange={setFilters} matched={matched.length} />
+
+        {/* archived missions — alternating editorial rows */}
+        {completed.length > 0 && (
+          <div className="mt-14 space-y-6 sm:mt-20 sm:space-y-8">
+            {completed.map((mission, index) => (
+              <MissionRecord key={mission.number} mission={mission} index={index} />
+            ))}
+          </div>
+        )}
+
+        {/* live operations — the centrepiece carries the classified treatment */}
+        {showFeature && (
+          <div className="mt-16 sm:mt-24">
+            <div className="mb-5 flex items-center gap-3">
+              <span className="relative flex h-1.5 w-1.5" aria-hidden="true">
+                <span className="absolute inline-flex h-full w-full rounded-full bg-neon animate-pulse-dot" />
+              </span>
+              <span className="font-tech text-[0.7rem] tracking-[0.26em] text-neon">{missionMeta.liveLabel}</span>
+              <span className="h-px flex-1 bg-gradient-to-r from-neon/40 to-transparent" aria-hidden="true" />
+            </div>
+            <BlackoutMission mission={featureMission} />
+          </div>
+        )}
+
+        {/* additional live operations — briefing-styled archive rows */}
+        {live.filter((mission) => mission !== featureMission || filtering).length > 0 && (
+          <div className={showFeature ? 'mt-8 space-y-6 sm:mt-10 sm:space-y-8' : 'mt-14 space-y-6 sm:mt-20 sm:space-y-8'}>
+            {live
+              .filter((mission) => mission !== featureMission || filtering)
+              .map((mission, index) => (
+                <MissionRecord key={mission.number} mission={mission} index={index} live />
+              ))}
+          </div>
+        )}
+
+        {/* empty state — filters are the only thing that can produce it */}
+        {matched.length === 0 && (
+          <div className="mt-14 border border-dashed border-line-soft px-5 py-12 text-center">
+            <p className="font-tech text-[0.66rem] tracking-[0.22em] text-bone/70">
+              NO OPERATION MATCHES THESE FILTERS
+            </p>
+            <p className="mx-auto mt-2 max-w-md text-[0.72rem] leading-relaxed text-mute/55">
+              The archive holds exactly four operations. Clear the filters to see all of them, or
+              try an operative codename such as GHOST.
+            </p>
+            <button
+              type="button"
+              onClick={() => setFilters(EMPTY_FILTERS)}
+              className="font-tech mt-4 border border-neon/40 px-3 py-1.5 text-[0.5rem] tracking-[0.18em] text-neon transition-colors hover:bg-neon/10"
+            >
+              CLEAR ALL FILTERS
+            </button>
+          </div>
+        )}
+      </div>
+    </section>
+  )
+}
+
+function MissionRecord({ mission, index, live = false }: { mission: Mission; index: number; live?: boolean }) {
+  const [open, setOpen] = useState(false)
+  const reduce = useReducedMotion()
+  const id = useId()
+  const reversed = index % 2 === 1
+  const status = statusDisplay[mission.status]
+  // Participation comes from the shared model — never typed on the card.
+  const participants = operativesForMission(mission.id)
+  const summaryFallback = status.active
+    ? 'Operation is live. Debrief fields stay sealed until the unit clears them for release.'
+    : 'Field record declassified as complete. Detailed debrief fields are open for the operative unit to publish.'
+
+  return (
+    <motion.article
+      data-mission-id={mission.id}
+      className={cn(
+        'group relative overflow-hidden border bg-card/40 transition-colors duration-500',
+        live ? 'border-neon/25 hover:border-neon/45' : 'border-line-soft hover:border-neon/25',
+      )}
+      initial={reduce ? false : { opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 'some', margin: '160% 0px 15% 0px' }}
+      transition={{ duration: 1, ease: EASE_OUT_EXPO, delay: index * 0.08 }}
+    >
+      <div className="grid grid-cols-1 lg:grid-cols-12">
+        {/* imagery */}
+        <div
+          className={cn(
+            'relative min-h-[15rem] overflow-hidden bg-void lg:col-span-7 lg:min-h-[26rem]',
+            reversed && 'lg:order-2',
+          )}
+        >
+          {mission.image && (
+            <img
+              src={imageFallback(mission.image)}
+              srcSet={imageSrcSet(mission.image)}
+              sizes="(min-width: 1024px) 58vw, 100vw"
+              alt={mission.image.alt}
+              loading="lazy"
+              decoding="async"
+              width={1400}
+              height={933}
+              className="absolute inset-0 h-full w-full scale-[1.03] object-cover opacity-80 brightness-[1.06] grayscale-[35%] transition-all duration-[1400ms] ease-out group-hover:scale-[1.08] group-hover:opacity-95 group-hover:grayscale-0"
+            />
+          )}
+          <div
+            className={cn(
+              'absolute inset-0 bg-gradient-to-t from-card via-void/30 to-void/10 lg:via-void/10 lg:to-card',
+              reversed ? 'lg:bg-gradient-to-l' : 'lg:bg-gradient-to-r',
+              reversed ? 'lg:from-card' : 'lg:from-transparent',
+            )}
+          />
+          <div
+            className="absolute inset-0 opacity-[0.45] mix-blend-overlay"
+            style={{
+              backgroundImage:
+                'repeating-linear-gradient(0deg, rgba(0,0,0,0.4) 0px, rgba(0,0,0,0.4) 1px, transparent 1px, transparent 3px)',
+            }}
+            aria-hidden="true"
+          />
+
+          {/* archive / live stamp */}
+          <div
+            className={cn(
+              'absolute left-4 top-4 z-20 flex items-center gap-2 border bg-void/70 px-2.5 py-1 backdrop-blur-sm sm:left-5 sm:top-5',
+              status.active ? 'border-neon/45' : 'border-emerald/30',
+            )}
+          >
+            {status.active ? (
+              <Radio size={9} className="text-neon" aria-hidden="true" />
+            ) : (
+              <Check size={9} className="text-emerald" aria-hidden="true" />
+            )}
+            <span
+              className={cn('font-tech text-[0.66rem] tracking-[0.2em]', status.active ? 'text-neon' : 'text-emerald')}
+            >
+              {status.active ? 'LIVE OPERATION' : 'ARCHIVED'}
+            </span>
+          </div>
+
+          <div className="absolute bottom-4 left-4 z-20 flex items-center gap-2 sm:bottom-5 sm:left-5">
+            <span className="font-tech text-[2.4rem] font-light leading-none tracking-[-0.04em] text-bone/40 sm:text-[3.2rem]">
+              {mission.number}
+            </span>
+            <span className="font-tech pb-1 text-[0.66rem] tracking-[0.22em] text-mute/75">MISSION FILE</span>
+          </div>
+        </div>
+
+        {/* record body */}
+        <div
+          className={cn(
+            'relative flex flex-col justify-between p-5 sm:p-7 lg:col-span-5 lg:p-8',
+            reversed && 'lg:order-1',
+          )}
+        >
+          <div>
+            <div className="mb-4 flex flex-wrap items-center gap-2">
+              <StatusPill tone={status.tone} pulse={status.active}>
+                {status.label}
+              </StatusPill>
+              {mission.tags.map((tag) => (
+                <StatusPill key={tag} tone="muted">
+                  {tag}
+                </StatusPill>
+              ))}
+            </div>
+
+            <h3 className="font-display text-[clamp(1.5rem,3.4vw,2.15rem)] font-medium uppercase leading-[0.98] tracking-[-0.035em] text-bone">
+              {mission.title}
+            </h3>
+
+            <dl className="mt-5 grid grid-cols-2 gap-x-4 gap-y-3 border-y border-line-soft py-4">
+              {status.active ? (
+                <>
+                  <Meta label="MISSION STATUS" value={status.label} live />
+                  <Meta label="OPERATION" value={mission.codename} />
+                  <Meta label="ACCESS" value="CLASSIFIED" live />
+                  <Meta label="DATE" value={mission.date ?? 'AWAITING INTEL'} muted />
+                </>
+              ) : (
+                <>
+                  <Meta label="EVENT" value={mission.event ?? 'AWAITING INTEL'} />
+                  <Meta label="MISSION STATUS" value={status.label} accent />
+                  <Meta label="DATE" value={mission.date ?? 'AWAITING INTEL'} muted />
+                  <Meta label="VENUE" value={mission.venue ?? 'AWAITING INTEL'} muted />
+                </>
+              )}
+            </dl>
+
+            <p className="mt-4 text-[0.85rem] leading-relaxed text-mute">{mission.summary ?? summaryFallback}</p>
+          </div>
+
+          <div className="mt-6">
+            <button
+              type="button"
+              onClick={() => setOpen((v) => !v)}
+              aria-expanded={open}
+              {...(open ? { 'aria-controls': `${id}-panel` } : {})}
+              className="font-tech flex w-full items-center justify-between border-t border-line-soft pt-4 text-[0.7rem] tracking-[0.2em] text-bone/80 transition-colors hover:text-neon"
+            >
+              {open ? 'COLLAPSE MISSION RECORD' : 'OPEN MISSION RECORD'}
+              <ChevronDown
+                size={13}
+                className={cn('transition-transform duration-500', open && 'rotate-180')}
+                aria-hidden="true"
+              />
+            </button>
+
+            <AnimatePresence initial={false}>
+              {open && (
+                <motion.div
+                  id={`${id}-panel`}
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.6, ease: EASE_OUT_EXPO }}
+                  className="overflow-hidden"
+                >
+                  <OperationDebrief mission={mission} index={index} reduce={Boolean(reduce)} />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+      </div>
+
+      {/* footer metadata strip */}
+      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line-soft bg-void/40 px-5 py-2.5 sm:px-7">
+        <span className="font-tech flex flex-wrap items-center gap-2 text-[0.66rem] tracking-[0.2em] text-mute/75">
+          <ScanLine size={9} aria-hidden="true" />
+          FILE {mission.number} // {mission.codename}
+          <span className="text-mute/30" aria-hidden="true">·</span>
+          <span>
+            <span className="text-mute/45">ASSIGNED // </span>
+            <span className="text-bone/85">{participants.map((p) => p.codename).join(' · ')}</span>
+          </span>
+        </span>
+        <span className="font-tech flex items-center gap-2 text-[0.66rem] tracking-[0.2em] text-mute/75">
+          <FileLock2 size={9} aria-hidden="true" />
+          {status.active ? 'BRIEFING SEALED' : 'CLEARANCE GRANTED'}
+        </span>
+        <span className="font-tech hidden items-center gap-2 text-[0.66rem] tracking-[0.2em] text-mute/75 sm:flex">
+          <MapPin size={9} aria-hidden="true" />
+          SECTOR UNLISTED
+        </span>
+      </div>
+    </motion.article>
+  )
+}
+
+/**
+ * OPERATION DEBRIEF
+ * Completed operations get the full field set; ongoing ones explicitly
+ * refuse to show a debrief rather than inventing one. Every unverified
+ * field states its own absence.
+ */
+function OperationDebrief({
+  mission,
+  index,
+  reduce,
+}: {
+  mission: Mission
+  index: number
+  reduce: boolean
+}) {
+  const status = statusDisplay[mission.status]
+  const members = operativesForMission(mission.id)
+  const debrief = mission.debrief
+  const ongoing = status.active
+
+  const rows: { label: string; value: string | null; list?: string[] }[] = [
+    { label: debriefCopy.labels.overview, value: debrief.overview },
+    { label: debriefCopy.labels.technologies, value: null, list: debrief.technologies },
+    { label: debriefCopy.labels.achievements, value: null, list: debrief.achievements },
+    { label: debriefCopy.labels.lessons, value: null, list: debrief.lessons },
+  ]
+
+  return (
+    <div className="pt-4">
+      {/* header */}
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        <span className="font-tech flex items-center gap-1.5 border border-neon/30 px-2 py-1 text-[0.52rem] tracking-[0.16em] text-neon">
+          <FileLock2 size={8} aria-hidden="true" />
+          {debriefCopy.heading}
+        </span>
+        {mission.operationType === 'SOLO' && (
+          <span className="font-tech border border-neon/40 px-2 py-1 text-[0.52rem] tracking-[0.16em] text-neon">
+            {debriefCopy.soloLabel}
+          </span>
+        )}
+        <span className="font-tech ml-auto text-[0.5rem] tracking-[0.16em] text-mute/45">
+          FILE {mission.number}
+        </span>
+      </div>
+
+      {/* outcome line */}
+      {ongoing ? (
+        <div className="mb-3 border border-neon/25 bg-neon/[0.04] px-3 py-2">
+          <p className="font-tech text-[0.58rem] tracking-[0.16em] text-neon">{debriefCopy.ongoing}</p>
+          <p className="font-tech mt-1 text-[0.55rem] tracking-[0.14em] text-mute/70">
+            {debriefCopy.ongoingStatus}
+          </p>
+          <p className="font-tech mt-0.5 text-[0.55rem] tracking-[0.14em] text-mute/70">
+            {debriefCopy.ongoingDebrief}
+          </p>
+        </div>
+      ) : (
+        <p className="font-tech mb-3 border-l border-emerald/40 px-3 text-[0.55rem] tracking-[0.14em] text-emerald/80">
+          OPERATION CLOSED // RECORD SEALED
+        </p>
+      )}
+
+      {/* participants + classification */}
+      <div className="mb-3 border border-line-soft/70 px-3 py-2">
+        <p className="font-tech text-[0.5rem] tracking-[0.16em] text-mute/50">
+          {debriefCopy.confirmedOperatives}
+        </p>
+        <p className="font-tech mt-1 flex flex-wrap gap-x-2 gap-y-1 text-[0.58rem] tracking-[0.12em] text-bone/85">
+          {members.length > 0 ? (
+            members.map((operative) => <span key={operative.number}>{operative.codename}</span>)
+          ) : (
+            <span className="text-mute/50">{debriefCopy.notProvided}</span>
+          )}
+        </p>
+        <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-line-soft/50 pt-1.5">
+          <span className="font-tech text-[0.5rem] tracking-[0.14em] text-mute/45">
+            {debriefCopy.soloType}: <span className="text-bone/70">{mission.operationType}</span>
+          </span>
+          <span className="font-tech text-[0.5rem] tracking-[0.14em] text-mute/45">
+            {debriefCopy.assignedOperative}:{' '}
+            <span className="text-bone/70">
+              {mission.operationType === 'SOLO'
+                ? members.map((operative) => operative.codename).join(' · ') || debriefCopy.notProvided
+                : debriefCopy.notProvided}
+            </span>
+          </span>
+          <span className="font-tech text-[0.5rem] tracking-[0.14em] text-mute/45">
+            {debriefCopy.access}: <span className="text-neon/80">{debriefCopy.accessValue}</span>
+          </span>
+        </div>
+      </div>
+
+      {/* debrief fields — never fabricated */}
+      <ul>
+        {rows.map((row, i) => {
+          const hasTree = row.list && row.list.length > 0
+          return (
+            <motion.li
+              key={row.label}
+              className="flex items-start gap-3 border-b border-line-soft/70 py-2.5 last:border-0"
+              initial={reduce ? { opacity: 0 } : { opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.45, delay: 0.04 * i + 0.05 * index, ease: EASE_OUT_EXPO }}
+            >
+              <span className="font-tech mt-[3px] w-5 shrink-0 text-[0.66rem] tracking-[0.16em] text-neon/50">
+                {String(i + 1).padStart(2, '0')}
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="font-tech text-[0.6rem] tracking-[0.16em] text-mute/80">{row.label}</p>
+                {row.value ? (
+                  <p className="mt-1 text-[0.78rem] leading-snug text-bone/90">{row.value}</p>
+                ) : hasTree ? (
+                  <ul className="mt-1 space-y-0.5">
+                    {row.list!.map((item) => (
+                      <li key={item} className="font-tech text-[0.62rem] tracking-[0.12em] text-bone/80">
+                        · {item}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="font-tech mt-1 inline-flex items-center gap-1.5 border border-line px-1.5 py-0.5 text-[0.52rem] tracking-[0.14em] text-mute/45">
+                    {ongoing
+                      ? debriefCopy.notAvailable
+                      : i === 0
+                        ? debriefCopy.classified
+                        : debriefCopy.notProvided}
+                  </p>
+                )}
+              </div>
+            </motion.li>
+          )
+        })}
+      </ul>
+
+      {/* evidence — only real links, otherwise an explicit absence */}
+      <div className="mt-2 flex flex-wrap items-center gap-2 border-t border-line-soft/70 pt-2">
+        <span className="font-tech text-[0.5rem] tracking-[0.16em] text-mute/50">{debriefCopy.evidence}</span>
+        {debrief.evidence.length > 0 ? (
+          debrief.evidence.map((item) => (
+            <a
+              key={item.href}
+              href={item.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-tech text-[0.52rem] tracking-[0.14em] text-neon hover:text-bone"
+            >
+              {item.label}
+            </a>
+          ))
+        ) : (
+          <span className="font-tech text-[0.5rem] tracking-[0.14em] text-mute/40">{debriefCopy.notProvided}</span>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function Meta({
+  label,
+  value,
+  accent,
+  muted,
+  live,
+}: {
+  label: string
+  value: string
+  accent?: boolean
+  muted?: boolean
+  live?: boolean
+}) {
+  return (
+    <div>
+      <dt className="font-tech text-[0.7rem] tracking-[0.2em] text-mute/75">{label}</dt>
+      <dd
+        className={cn(
+          'font-tech mt-1 flex items-center gap-1.5 truncate text-[0.7rem] tracking-[0.14em]',
+          accent && 'text-emerald',
+          live && 'text-neon',
+          muted && 'text-mute/70',
+          !accent && !muted && !live && 'text-bone/85',
+        )}
+      >
+        {live && (
+          <span className="relative flex h-1 w-1 shrink-0" aria-hidden="true">
+            <span className="absolute inline-flex h-full w-full rounded-full bg-neon animate-pulse-dot" />
+          </span>
+        )}
+        {value}
+      </dd>
+    </div>
+  )
+}

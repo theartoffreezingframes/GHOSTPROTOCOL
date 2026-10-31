@@ -1,0 +1,58 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build output
+dist/
+dist-ssr/
+build/
+out/
+*.tsbuildinfo
+node_modules/.tmp
+
+# Environment files & secrets (never commit)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+.netrc
+.git-credentials
+.vercel
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Caches & temporary files
+.cache/
+.temp/
+.tmp/
+coverage/
+.eslintcache
+.stylelintcache
+.vite/
+test-results/
+playwright-report/
+.nyc_output/
+
+# Editors & OS
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+*~
+
+# Raw, unoptimised image sources — the pipeline output in /public/media is
+# what the site ships. Replace a source file and run `npm run optimize:images`.
+src/assets/raw/

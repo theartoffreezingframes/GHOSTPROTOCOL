@@ -1,0 +1,44 @@
+# GHOST PROTOCOL — Render Static Site
+#
+# Deployment target is Render (Static Site). This file is declarative
+# configuration only: nothing here deploys, and no deploy is performed
+# automatically. Creating the service in the Render dashboard is a
+# separate, authorised step.
+#
+# Render's own dashboard equivalent of these settings:
+#   Build Command        npm ci && npm run build
+#   Publish Directory    dist
+#   Node Version         20.19 or newer (see .nvmrc)
+
+services:
+  - type: web
+    name: ghost-protocol
+    runtime: static
+    buildCommand: npm ci && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: NODE_VERSION
+        value: 20.19.0
+    headers:
+      # Hashed Vite output — safe to cache forever.
+      - path: /assets/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+      # Generated responsive imagery — changes only on re-export.
+      - path: /media/*
+        name: Cache-Control
+        value: public, max-age=604800
+      - path: /index.html
+        name: Cache-Control
+        value: public, max-age=0, must-revalidate
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin
+    routes:
+      # Single-page app: every path resolves to the built entry point.
+      - type: rewrite
+        source: /*
+        destination: /index.html

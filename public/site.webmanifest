@@ -1,0 +1,39 @@
+{
+  "name": "Ghost Protocol — Independent Cyber Collective",
+  "short_name": "Ghost Protocol",
+  "description": "An independent cyber collective of hackers, developers and problem-solvers. Invisible to the ordinary, unstoppable in execution.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#050706",
+  "theme_color": "#050706",
+  "categories": ["security", "technology", "portfolio"],
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable"
+    }
+  ]
+}
