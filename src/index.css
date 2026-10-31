@@ -92,8 +92,10 @@
     color: #06120a;
   }
 
+  /* Neon ring wins over the UA default (which falls back to currentColor
+     on translucent/muted text). */
   :focus-visible {
-    outline: 2px solid var(--color-neon);
+    outline: 2px solid var(--color-neon) !important;
     outline-offset: 3px;
     border-radius: 2px;
   }

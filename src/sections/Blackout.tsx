@@ -48,6 +48,9 @@ export function BlackoutMission({ mission }: { mission: Mission }) {
     return () => window.clearTimeout(t)
   }, [reduce])
 
+  const ctaRef = useRef<HTMLButtonElement>(null)
+  const dialogRef = useRef<HTMLDivElement>(null)
+
   const open = () => {
     setDecrypted(true)
     window.setTimeout(() => setGranted(true), 1250)
@@ -56,7 +59,25 @@ export function BlackoutMission({ mission }: { mission: Mission }) {
   const close = () => {
     setDecrypted(false)
     setGranted(false)
+    window.setTimeout(() => ctaRef.current?.focus({ preventScroll: true }), 60)
   }
+
+  // Keyboard: Esc always closes, focus moves into the sealed file.
+  useEffect(() => {
+    if (!decrypted) return
+    const focusId = window.setTimeout(
+      () => dialogRef.current?.querySelector<HTMLElement>('button')?.focus({ preventScroll: true }),
+      140,
+    )
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') close()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => {
+      window.clearTimeout(focusId)
+      window.removeEventListener('keydown', onKey)
+    }
+  }, [decrypted])
 
   return (
     <div ref={sectionRef} className="relative mt-16 sm:mt-24">
@@ -218,6 +239,7 @@ export function BlackoutMission({ mission }: { mission: Mission }) {
             <div className="mt-9 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
               <Magnetic strength={9}>
                 <button
+                  ref={ctaRef}
                   type="button"
                   onClick={open}
                   className={cn(
@@ -285,6 +307,7 @@ export function BlackoutMission({ mission }: { mission: Mission }) {
         <AnimatePresence>
           {decrypted && (
             <motion.div
+              ref={dialogRef}
               className="absolute inset-0 z-40 flex items-center justify-center bg-black/92 p-5 backdrop-blur-md"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}

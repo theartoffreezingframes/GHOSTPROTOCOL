@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion, useScroll, useSpring } from 'motion/react'
 import { Menu, X } from 'lucide-react'
 
@@ -18,6 +18,8 @@ export function Nav({ onNavigate, ready }: NavProps) {
   const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [active, setActive] = useState<string>('')
+  const sheetRef = useRef<HTMLDivElement>(null)
+  const toggleRef = useRef<HTMLButtonElement>(null)
   const reduce = useReducedMotion()
   const { scrollYProgress } = useScroll()
   const progress = useSpring(scrollYProgress, { stiffness: 140, damping: 30, restDelta: 0.001 })
@@ -50,9 +52,16 @@ export function Nav({ onNavigate, ready }: NavProps) {
     return () => observer.disconnect()
   }, [])
 
-  // Lock the page while the mobile sheet is open.
+  // Lock the page while the mobile sheet is open, and keep keyboard
+  // focus inside it — returning focus to the toggle on close.
   useEffect(() => {
     document.body.classList.toggle('is-locked', open)
+    if (open) {
+      const first = sheetRef.current?.querySelector<HTMLElement>('a, button')
+      const id = window.setTimeout(() => first?.focus({ preventScroll: true }), 120)
+      return () => window.clearTimeout(id)
+    }
+    if (sheetRef.current === null) toggleRef.current?.focus({ preventScroll: true })
     return () => document.body.classList.remove('is-locked')
   }, [open])
 
@@ -151,6 +160,7 @@ export function Nav({ onNavigate, ready }: NavProps) {
               </button>
 
               <button
+                ref={toggleRef}
                 type="button"
                 className="relative flex h-10 w-10 items-center justify-center border border-line text-bone transition-colors hover:border-neon/60 hover:text-neon lg:hidden"
                 onClick={() => setOpen((v) => !v)}
@@ -176,6 +186,7 @@ export function Nav({ onNavigate, ready }: NavProps) {
       <AnimatePresence>
         {open && (
           <motion.div
+            ref={sheetRef}
             id="mobile-menu"
             className="fixed inset-0 z-[99] flex flex-col justify-between bg-void/97 px-6 pb-8 pt-24 backdrop-blur-xl lg:hidden"
             initial={{ opacity: 0, clipPath: 'inset(0 0 100% 0)' }}
