@@ -101,17 +101,17 @@ export function Hero({ ready, onNavigate }: HeroProps) {
           animate={{ opacity: ready ? 1 : 0 }}
           transition={{ duration: 1, ease: EASE_OUT_EXPO, delay: delay(0.1) }}
         >
-          <span className="font-tech text-[0.6rem] tracking-[0.26em] text-mute sm:text-[0.58rem]">
+          <span className="font-tech text-[0.7rem] tracking-[0.26em] text-mute sm:text-[0.66rem]">
             {brand.eyebrow}
           </span>
           <div className="hidden items-center gap-5 sm:flex">
-            <span className="font-tech text-[0.6rem] tracking-[0.2em] text-mute/70">
+            <span className="font-tech text-[0.7rem] tracking-[0.2em] text-mute/70">
               <UtcClock />
             </span>
-            <span className="font-tech text-[0.6rem] tracking-[0.2em] text-mute/70">
+            <span className="font-tech text-[0.7rem] tracking-[0.2em] text-mute/70">
               NODE <DecodeLabel value="0x7F3A" className="text-neon/80" />
             </span>
-            <span className="font-tech flex items-center gap-1.5 text-[0.6rem] tracking-[0.2em] text-neon">
+            <span className="font-tech flex items-center gap-1.5 text-[0.7rem] tracking-[0.2em] text-neon">
               <span className="h-1 w-1 rounded-full bg-neon animate-pulse-dot" aria-hidden="true" />
               UPLINK
             </span>
@@ -137,7 +137,7 @@ export function Hero({ ready, onNavigate }: HeroProps) {
 
             <div
               aria-hidden="true"
-              className="font-display text-[clamp(2.35rem,8.1vw,8.2rem)] font-semibold uppercase leading-[0.88] tracking-[-0.045em] text-bone"
+              className="font-display text-[clamp(2.35rem,8.1vw,8.2rem)] font-medium uppercase leading-[0.88] tracking-[-0.045em] text-bone"
             >
               {HEADLINE.map((line, lineIndex) => (
                 <span key={lineIndex} className="flex flex-wrap items-baseline gap-x-[0.22em] overflow-hidden pb-[0.06em]">
@@ -222,7 +222,7 @@ export function Hero({ ready, onNavigate }: HeroProps) {
             <div className="relative border border-line-soft bg-void/45 p-4 backdrop-blur-md sm:p-5">
               <HudFrame />
               <div className="mb-3 flex items-center justify-between">
-                <span className="font-tech text-[0.6rem] tracking-[0.24em] text-mute">SYS_MONITOR</span>
+                <span className="font-tech text-[0.7rem] tracking-[0.24em] text-mute">SYS_MONITOR</span>
                 <ShieldCheck size={12} className="text-neon/70" aria-hidden="true" />
               </div>
               <dl className="space-y-2.5">
@@ -231,10 +231,10 @@ export function Hero({ ready, onNavigate }: HeroProps) {
                     key={row.label}
                     className="flex items-center justify-between gap-3 border-b border-line-soft/70 pb-2 last:border-0 last:pb-0"
                   >
-                    <dt className="font-tech text-[0.6rem] tracking-[0.18em] text-mute">{row.label}</dt>
+                    <dt className="font-tech text-[0.7rem] tracking-[0.18em] text-mute">{row.label}</dt>
                     <dd
                       className={cn(
-                        'font-tech flex items-center gap-1.5 text-[0.58rem] tracking-[0.16em]',
+                        'font-tech flex items-center gap-1.5 text-[0.66rem] tracking-[0.16em]',
                         row.state === 'online' && 'text-neon',
                         row.state === 'alert' && 'text-bone',
                         row.state === 'neutral' && 'text-bone',
@@ -249,19 +249,32 @@ export function Hero({ ready, onNavigate }: HeroProps) {
                 ))}
               </dl>
 
-              {/* waveform */}
-              <div className="mt-4 flex h-6 items-end gap-[3px]" aria-hidden="true">
-                {Array.from({ length: 26 }).map((_, i) => (
-                  <span
-                    key={i}
-                    className="w-full origin-bottom bg-neon/45"
-                    style={{
-                      height: `${18 + Math.abs(Math.sin(i * 0.9)) * 82}%`,
-                      animation: reduce ? undefined : `gp-bars ${1.4 + (i % 5) * 0.22}s ease-in-out ${i * 0.05}s infinite`,
-                    }}
-                  />
-                ))}
-              </div>
+              {/* waveform — single animated SVG path instead of 26 CSS animations */}
+              <svg
+                className="mt-4 h-6 w-full overflow-visible"
+                viewBox="0 0 130 24"
+                preserveAspectRatio="none"
+                aria-hidden="true"
+              >
+                <motion.path
+                  d="M0 12 L5 4 L10 18 L15 8 L20 20 L25 6 L30 16 L35 10 L40 19 L45 5 L50 15 L55 9 L60 21 L65 7 L70 17 L75 11 L80 20 L85 6 L90 16 L95 9 L100 19 L105 5 L110 15 L115 10 L120 18 L125 8 L130 13"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="0.9"
+                  strokeLinejoin="round"
+                  className="text-neon/60"
+                  animate={reduce ? undefined : { pathLength: [0.96, 1] }}
+                  transition={{ duration: 2.6, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
+                />
+                <path
+                  d="M0 12 L5 4 L10 18 L15 8 L20 20 L25 6 L30 16 L35 10 L40 19 L45 5 L50 15 L55 9 L60 21 L65 7 L70 17 L75 11 L80 20 L85 6 L90 16 L95 9 L100 19 L105 5 L110 15 L115 10 L120 18 L125 8 L130 13"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="0.6"
+                  strokeOpacity="0.35"
+                  className="text-neon"
+                />
+              </svg>
             </div>
           </motion.aside>
         </div>
@@ -279,7 +292,7 @@ export function Hero({ ready, onNavigate }: HeroProps) {
               e.preventDefault()
               onNavigate('protocol')
             }}
-            className="group font-tech flex items-center gap-3 text-[0.6rem] tracking-[0.22em] text-mute transition-colors hover:text-neon"
+            className="group font-tech flex items-center gap-3 text-[0.7rem] tracking-[0.22em] text-mute transition-colors hover:text-neon"
           >
             <span className="flex h-7 w-7 items-center justify-center border border-line transition-colors group-hover:border-neon/60">
               <ArrowDownRight size={11} className="transition-transform duration-500 group-hover:rotate-90" aria-hidden="true" />
@@ -293,7 +306,7 @@ export function Hero({ ready, onNavigate }: HeroProps) {
               e.preventDefault()
               onNavigate('protocol')
             }}
-            className="font-tech flex items-center gap-2 text-[0.62rem] tracking-[0.22em] text-mute/70 transition-colors hover:text-neon md:hidden"
+            className="font-tech flex items-center gap-2 text-[0.7rem] tracking-[0.22em] text-mute/70 transition-colors hover:text-neon md:hidden"
           >
             <span className="h-1 w-1 rounded-full bg-neon animate-pulse-dot" aria-hidden="true" />
             01 — 07
@@ -301,7 +314,7 @@ export function Hero({ ready, onNavigate }: HeroProps) {
 
           <div className="hidden items-center gap-6 md:flex">
             {brand.statements.map((statement) => (
-              <span key={statement} className="font-tech flex items-center gap-2 text-[0.6rem] tracking-[0.2em] text-mute/70">
+              <span key={statement} className="font-tech flex items-center gap-2 text-[0.7rem] tracking-[0.2em] text-mute/70">
                 <CornerDownRight size={9} className="text-neon/50" aria-hidden="true" />
                 {statement}
               </span>

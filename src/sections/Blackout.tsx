@@ -87,9 +87,9 @@ export function BlackoutMission({ mission }: { mission: Mission }) {
       <motion.article
         id="operation-blackout"
         className="relative overflow-hidden border border-neon/25 bg-black"
-        initial={{ opacity: 0, y: 40 }}
+        initial={reduce ? false : { opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.1 }}
+        viewport={{ once: true, amount: 'some', margin: '160% 0px 15% 0px' }}
         transition={{ duration: 1.2, ease: EASE_OUT_EXPO }}
         aria-labelledby="blackout-heading"
       >
@@ -152,19 +152,19 @@ export function BlackoutMission({ mission }: { mission: Mission }) {
             <span className="relative flex h-2 w-2" aria-hidden="true">
               <span className="absolute inline-flex h-full w-full rounded-full bg-neon animate-pulse-dot" />
             </span>
-            <span className="font-tech text-[0.58rem] tracking-[0.24em] text-neon sm:text-[0.6rem]">
+            <span className="font-tech text-[0.66rem] tracking-[0.24em] text-neon sm:text-[0.7rem]">
               INCOMING OPERATION
             </span>
           </div>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-            <span className="font-tech flex items-center gap-1.5 text-[0.62rem] tracking-[0.18em] text-mute/80 sm:text-[0.58rem]">
+            <span className="font-tech flex items-center gap-1.5 text-[0.7rem] tracking-[0.18em] text-mute/80 sm:text-[0.66rem]">
               <Radio size={9} aria-hidden="true" />
               SIGNAL LOST · RECONNECTING
             </span>
-            <span className="font-tech hidden text-[0.62rem] tracking-[0.18em] text-mute/60 sm:inline">
+            <span className="font-tech hidden text-[0.7rem] tracking-[0.18em] text-mute/75 sm:inline">
               CH // <DecodeLabel value="0xB1A0" />
             </span>
-            <span className="font-tech flex items-center gap-1.5 border border-neon/30 px-2 py-0.5 text-[0.62rem] tracking-[0.18em] text-neon">
+            <span className="font-tech flex items-center gap-1.5 border border-neon/30 px-2 py-0.5 text-[0.7rem] tracking-[0.18em] text-neon">
               <AlertTriangle size={8} aria-hidden="true" />
               CLASSIFIED
             </span>
@@ -176,24 +176,24 @@ export function BlackoutMission({ mission }: { mission: Mission }) {
           <div className="lg:col-span-8">
             <motion.div
               className="mb-5 flex items-center gap-3"
-              initial={{ opacity: 0, y: 12 }}
+              initial={reduce ? false : { opacity: 0, y: 12 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.5 }}
+              viewport={{ once: true, amount: 'some', margin: '160% 0px 15% 0px' }}
               transition={{ duration: 0.8, ease: EASE_OUT_EXPO }}
             >
-              <span className="font-tech text-[0.6rem] tracking-[0.28em] text-neon">003</span>
-              <span className="font-tech text-[0.6rem] tracking-[0.28em] text-mute/60" aria-hidden="true">
+              <span className="font-tech text-[0.7rem] tracking-[0.28em] text-neon">003</span>
+              <span className="font-tech text-[0.7rem] tracking-[0.28em] text-mute/75" aria-hidden="true">
                 //
               </span>
-              <span className="font-tech text-[0.6rem] tracking-[0.28em] text-mute">ACTIVE FILE</span>
+              <span className="font-tech text-[0.7rem] tracking-[0.28em] text-mute">ACTIVE FILE</span>
               <span className="h-px flex-1 bg-gradient-to-r from-neon/40 to-transparent" aria-hidden="true" />
             </motion.div>
 
             <MaskedLines
               lines={blackoutCopy.headline}
               as="h2"
-              className="font-display text-[clamp(1.9rem,5vw,3.4rem)] font-semibold uppercase leading-[0.92] tracking-[-0.04em] text-bone/85"
-              amount={0.4}
+              className="font-display text-[clamp(1.9rem,5vw,3.4rem)] font-medium uppercase leading-[0.92] tracking-[-0.04em] text-bone/85"
+              amount="some"
               id="blackout-heading"
             />
 
@@ -204,16 +204,16 @@ export function BlackoutMission({ mission }: { mission: Mission }) {
               className="mt-4 overflow-hidden sm:mt-6"
               initial="hidden"
               whileInView="show"
-              viewport={{ once: true, amount: 0.2 }}
+              viewport={{ once: true, amount: 'some', margin: '160% 0px 15% 0px' }}
             >
               <motion.div
-                className="font-display select-none text-[clamp(3.2rem,13.5vw,10rem)] font-semibold uppercase leading-[0.82] tracking-[-0.055em] text-neon text-glow"
+                className="font-display select-none text-[clamp(3.2rem,13.5vw,10rem)] font-medium uppercase leading-[0.82] tracking-[-0.055em] text-neon text-glow"
                 variants={{
-                  hidden: reduce ? { opacity: 0 } : { y: '104%', opacity: 0 },
+                  hidden: reduce ? { opacity: 1, y: '0%' } : { y: '104%', opacity: 0 },
                   show: {
                     y: '0%',
                     opacity: 1,
-                    transition: { duration: 1.25, ease: EASE_OUT_EXPO, delay: 0.1 },
+                    transition: { duration: reduce ? 0 : 1.25, ease: EASE_OUT_EXPO, delay: reduce ? 0 : 0.1 },
                   },
                 }}
               >
@@ -225,11 +225,11 @@ export function BlackoutMission({ mission }: { mission: Mission }) {
               {blackoutCopy.support.map((line, i) => (
                 <motion.p
                   key={line}
-                  className="font-tech text-[0.66rem] tracking-[0.2em] text-bone/70 sm:text-[0.72rem]"
-                  initial={{ opacity: 0, y: 14 }}
+                  className="font-tech text-[0.72rem] tracking-[0.2em] text-bone/70"
+                  initial={reduce ? false : { opacity: 0, y: 14 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, amount: 0.6 }}
-                  transition={{ duration: 0.7, delay: 0.2 + i * 0.1, ease: EASE_OUT_EXPO }}
+                  viewport={{ once: true, amount: 'some', margin: '160% 0px 15% 0px' }}
+                  transition={{ duration: 0.7, delay: 0.15 + i * 0.09, ease: EASE_OUT_EXPO }}
                 >
                   {line}
                 </motion.p>
@@ -243,7 +243,7 @@ export function BlackoutMission({ mission }: { mission: Mission }) {
                   type="button"
                   onClick={open}
                   className={cn(
-                    'group relative inline-flex w-full items-center justify-center gap-3 overflow-hidden border border-neon bg-neon px-6 py-4 font-tech text-[0.62rem] font-medium tracking-[0.2em] text-black transition-all duration-500 sm:w-auto sm:text-[0.66rem]',
+                    'group relative inline-flex w-full items-center justify-center gap-3 overflow-hidden border border-neon bg-neon px-6 py-4 font-tech text-[0.7rem] tracking-[0.2em] text-black transition-all duration-500 sm:w-auto sm:text-[0.72rem]',
                     'hover:shadow-[0_0_40px_-8px_rgba(57,255,20,0.65)]',
                   )}
                 >
@@ -252,7 +252,7 @@ export function BlackoutMission({ mission }: { mission: Mission }) {
                   {blackoutCopy.cta}
                 </button>
               </Magnetic>
-              <span className="font-tech text-[0.58rem] leading-relaxed tracking-[0.18em] text-mute/60">
+              <span className="font-tech text-[0.66rem] leading-relaxed tracking-[0.18em] text-mute/75">
                 AUTHORIZATION REQUIRED
                 <br />
                 NO DETAILS ON RECORD
@@ -265,8 +265,8 @@ export function BlackoutMission({ mission }: { mission: Mission }) {
             <div className="relative border border-neon/20 bg-black/70 p-4 backdrop-blur-md sm:p-5">
               <HudFrame />
               <div className="mb-3 flex items-center justify-between">
-                <span className="font-tech text-[0.58rem] tracking-[0.22em] text-mute">MISSION TELEMETRY</span>
-                <span className="font-tech text-[0.62rem] tracking-[0.18em] text-neon/70">LIVE</span>
+                <span className="font-tech text-[0.66rem] tracking-[0.22em] text-mute">MISSION TELEMETRY</span>
+                <span className="font-tech text-[0.7rem] tracking-[0.18em] text-neon/70">LIVE</span>
               </div>
               <dl className="space-y-2.5">
                 {blackoutCopy.status.map((row) => (
@@ -274,10 +274,10 @@ export function BlackoutMission({ mission }: { mission: Mission }) {
                     key={row.label}
                     className="flex items-center justify-between gap-3 border-b border-neon/10 pb-2 last:border-0 last:pb-0"
                   >
-                    <dt className="font-tech text-[0.58rem] tracking-[0.18em] text-mute/80">{row.label}</dt>
+                    <dt className="font-tech text-[0.66rem] tracking-[0.18em] text-mute/80">{row.label}</dt>
                     <dd
                       className={cn(
-                        'font-tech text-[0.6rem] tracking-[0.16em]',
+                        'font-tech text-[0.7rem] tracking-[0.16em]',
                         row.value === 'CLASSIFIED' || row.value === 'UPCOMING' ? 'text-neon' : 'text-bone/85',
                       )}
                     >
@@ -291,13 +291,13 @@ export function BlackoutMission({ mission }: { mission: Mission }) {
                 <span className="relative flex h-1.5 w-1.5" aria-hidden="true">
                   <span className="absolute inline-flex h-full w-full rounded-full bg-neon animate-pulse-dot" />
                 </span>
-                <span className="font-tech text-[0.62rem] tracking-[0.18em] text-mute/60">
+                <span className="font-tech text-[0.7rem] tracking-[0.18em] text-mute/75">
                   AWAITING AUTHORIZATION
                 </span>
               </div>
             </div>
 
-            <p className="font-tech mt-4 hidden text-[0.62rem] leading-relaxed tracking-[0.16em] text-mute/40 lg:block">
+            <p className="font-tech mt-4 hidden text-[0.7rem] leading-relaxed tracking-[0.16em] text-mute/60 lg:block">
               {blackoutCopy.placeholder} // DATE, VENUE, OBJECTIVES AND RESULTS WILL BE DECLASSIFIED WHEN CONFIRMED.
             </p>
           </div>
@@ -339,7 +339,7 @@ export function BlackoutMission({ mission }: { mission: Mission }) {
                 <div className="overflow-hidden">
                   <motion.h3
                     id="blackout-dialog-title"
-                    className="font-display text-[clamp(1.15rem,4vw,1.85rem)] font-semibold uppercase leading-tight tracking-[-0.02em] text-neon"
+                    className="font-display text-[clamp(1.15rem,4vw,1.85rem)] font-medium uppercase leading-tight tracking-[-0.02em] text-neon"
                     initial={reduce ? { opacity: 0 } : { y: '110%' }}
                     animate={reduce ? { opacity: 1 } : { y: '0%' }}
                     transition={{ duration: 0.8, ease: EASE_OUT_EXPO, delay: 0.15 }}
@@ -348,7 +348,7 @@ export function BlackoutMission({ mission }: { mission: Mission }) {
                   </motion.h3>
                 </div>
                 <motion.p
-                  className="font-tech mt-3 text-[0.62rem] tracking-[0.24em] text-bone/70"
+                  className="font-tech mt-3 text-[0.7rem] tracking-[0.24em] text-bone/80"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.6, delay: 0.5 }}
@@ -365,7 +365,7 @@ export function BlackoutMission({ mission }: { mission: Mission }) {
                     transition={{ duration: granted ? 0.6 : 1.6, ease: EASE_OUT_EXPO, delay: 0.2 }}
                   />
                 </div>
-                <p className="font-tech mx-auto mt-2 flex w-full max-w-sm items-center justify-between text-[0.62rem] tracking-[0.18em] text-mute/60">
+                <p className="font-tech mx-auto mt-2 flex w-full max-w-sm items-center justify-between text-[0.7rem] tracking-[0.18em] text-mute/75">
                   <span>DECRYPTION</span>
                   <span className="tabular-nums text-neon/80">{granted ? 'LOCKED' : 'INTERRUPTED'}</span>
                 </p>
@@ -373,7 +373,7 @@ export function BlackoutMission({ mission }: { mission: Mission }) {
                 <AnimatePresence>
                   {granted && (
                     <motion.p
-                      className="font-tech mt-6 flex items-center justify-center gap-2 text-[0.58rem] tracking-[0.22em] text-bone/50"
+                      className="font-tech mt-6 flex items-center justify-center gap-2 text-[0.66rem] tracking-[0.22em] text-bone/70"
                       initial={{ opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.6 }}
@@ -387,7 +387,7 @@ export function BlackoutMission({ mission }: { mission: Mission }) {
                 <button
                   type="button"
                   onClick={close}
-                  className="font-tech mt-8 inline-flex items-center gap-2 border border-line px-5 py-3 text-[0.6rem] tracking-[0.2em] text-bone transition-colors hover:border-neon/60 hover:text-neon"
+                  className="font-tech mt-8 inline-flex items-center gap-2 border border-line px-5 py-3 text-[0.7rem] tracking-[0.2em] text-bone transition-colors hover:border-neon/60 hover:text-neon"
                 >
                   RETURN TO ARCHIVE
                 </button>
@@ -398,13 +398,13 @@ export function BlackoutMission({ mission }: { mission: Mission }) {
 
         {/* ── footer strip ── */}
         <div className="relative z-20 flex flex-wrap items-center justify-between gap-3 border-t border-neon/20 bg-black/70 px-4 py-2.5 sm:px-6">
-          <span className="font-tech text-[0.62rem] tracking-[0.2em] text-mute/60">
+          <span className="font-tech text-[0.7rem] tracking-[0.2em] text-mute/75">
             FILE 003 // BLACKOUT
           </span>
-          <span className="font-tech text-[0.62rem] tracking-[0.2em] text-neon/70">
+          <span className="font-tech text-[0.7rem] tracking-[0.2em] text-neon/70">
             NEXT OPERATION · PENDING
           </span>
-          <span className="font-tech hidden text-[0.62rem] tracking-[0.2em] text-mute/60 sm:inline">
+          <span className="font-tech hidden text-[0.7rem] tracking-[0.2em] text-mute/75 sm:inline">
             OPERATIVES ASSIGNED // 03
           </span>
         </div>

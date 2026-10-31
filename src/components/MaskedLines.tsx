@@ -13,7 +13,7 @@ type MaskedLinesProps = {
   stagger?: number
   /** Start the animation immediately instead of on scroll. */
   immediate?: boolean
-  amount?: number
+  amount?: number | 'some' | 'all'
   id?: string
 }
 
@@ -34,19 +34,36 @@ export function MaskedLines({
   delay = 0,
   stagger = 0.09,
   immediate = false,
-  amount = 0.3,
+  amount = 'some',
   id,
 }: MaskedLinesProps) {
   const reduce = useReducedMotion()
   const Tag = as
 
+  // Reduced motion: static, always-visible headline. Content must never
+  // depend on a scroll trigger to be readable.
+  if (reduce) {
+    return (
+      <Tag className={cn(className)} id={id}>
+        <span className="sr-only">{lines.join(' ')}</span>
+        <span aria-hidden="true" className="block">
+          {lines.map((line) => (
+            <span key={line} className={cn('block', lineClassName)}>
+              {line}
+            </span>
+          ))}
+        </span>
+      </Tag>
+    )
+  }
+
   const lineVariants = (index: number): Variants => ({
-    hidden: reduce ? { opacity: 0 } : { y: '112%', opacity: 0 },
+    hidden: { y: '112%', opacity: 0 },
     show: {
       y: '0%',
       opacity: 1,
       transition: {
-        duration: reduce ? 0.35 : 1.05,
+        duration: 1.05,
         ease: EASE_OUT_EXPO,
         delay: delay + index * stagger,
       },
@@ -62,7 +79,7 @@ export function MaskedLines({
         initial="hidden"
         {...(immediate
           ? { animate: 'show' }
-          : { whileInView: 'show', viewport: { once: true, amount } })}
+          : { whileInView: 'show', viewport: { once: true, amount, margin: '160% 0px 15% 0px' } })}
       >
         {lines.map((line, i) => (
           <span key={line} className="block overflow-hidden pb-[0.12em]">

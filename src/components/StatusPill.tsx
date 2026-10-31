@@ -28,7 +28,7 @@ export function StatusPill({ children, tone = 'muted', className, pulse = false 
   return (
     <span
       className={cn(
-        'font-tech inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-[0.62rem] leading-none tracking-[0.18em]',
+        'font-tech inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-[0.7rem] leading-none tracking-[0.18em]',
         tones[tone],
         className,
       )}

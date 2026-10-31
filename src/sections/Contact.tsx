@@ -18,6 +18,8 @@ const CHANNEL_ICON = ({ channel }: { channel: Channel }) =>
   )
 
 export function Contact() {
+  const reduce = useReducedMotion()
+
   return (
     <section
       id="contact"
@@ -33,16 +35,16 @@ export function Contact() {
       <div className="container-x relative z-10">
         <motion.div
           className="mb-8 flex flex-wrap items-center gap-x-4 gap-y-2"
-          initial={{ opacity: 0, y: 12 }}
+          initial={reduce ? false : { opacity: 0, y: 12 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.6 }}
+          viewport={{ once: true, amount: 'some', margin: '160% 0px 15% 0px' }}
           transition={{ duration: 0.7, ease: EASE_OUT_EXPO }}
         >
-          <span className="font-tech text-[0.66rem] tracking-[0.28em] text-neon">{contact.index}</span>
-          <span className="font-tech text-[0.66rem] tracking-[0.28em] text-mute" aria-hidden="true">
+          <span className="font-tech text-[0.72rem] tracking-[0.28em] text-neon">{contact.index}</span>
+          <span className="font-tech text-[0.72rem] tracking-[0.28em] text-mute" aria-hidden="true">
             //
           </span>
-          <span className="font-tech text-[0.66rem] tracking-[0.28em] text-mute">{contact.label}</span>
+          <span className="font-tech text-[0.72rem] tracking-[0.28em] text-mute">{contact.label}</span>
           <span className="hidden h-px flex-1 bg-line sm:block" aria-hidden="true" />
         </motion.div>
 
@@ -53,7 +55,7 @@ export function Contact() {
               as="h2"
               id="contact-heading"
               className="display-section max-w-2xl text-bone"
-              amount={0.3}
+              amount="some"
             />
 
             <Reveal delay={0.2} className="mt-7 max-w-md">
@@ -71,8 +73,8 @@ export function Contact() {
           <div className="lg:col-span-5">
             <Reveal delay={0.15}>
               <div className="mb-4 flex items-center justify-between border-b border-line-soft pb-3">
-                <span className="font-tech text-[0.58rem] tracking-[0.22em] text-mute">OPEN CHANNELS</span>
-                <span className="font-tech flex items-center gap-1.5 text-[0.62rem] tracking-[0.18em] text-neon/70">
+                <span className="font-tech text-[0.66rem] tracking-[0.22em] text-mute">OPEN CHANNELS</span>
+                <span className="font-tech flex items-center gap-1.5 text-[0.7rem] tracking-[0.18em] text-neon/70">
                   <span className="h-1 w-1 rounded-full bg-neon animate-pulse-dot" aria-hidden="true" />
                   LISTENING
                 </span>
@@ -85,8 +87,8 @@ export function Contact() {
               </ul>
 
               <div className="mt-6 flex items-start gap-3">
-                <Lock size={11} className="mt-0.5 shrink-0 text-mute/50" aria-hidden="true" />
-                <p className="font-tech text-[0.62rem] leading-relaxed tracking-[0.16em] text-mute/45">
+                <Lock size={11} className="mt-0.5 shrink-0 text-mute/70" aria-hidden="true" />
+                <p className="font-tech text-[0.7rem] leading-relaxed tracking-[0.16em] text-mute/65">
                   PUBLIC CHANNELS ARE PUBLISHED ONLY AFTER THE UNIT CONFIRMS THEM. NO UNVERIFIED CONTACT DETAILS
                   APPEAR HERE.
                 </p>
@@ -109,7 +111,7 @@ function ChannelRow({ channel, index }: { channel: Channel; index: number }) {
 
   const content = (
     <>
-      <span className="font-tech w-6 shrink-0 text-[0.62rem] tracking-[0.18em] text-mute/40">
+      <span className="font-tech w-6 shrink-0 text-[0.7rem] tracking-[0.18em] text-mute/60">
         {String(index + 1).padStart(2, '0')}
       </span>
       <span
@@ -117,7 +119,7 @@ function ChannelRow({ channel, index }: { channel: Channel; index: number }) {
           'flex h-9 w-9 shrink-0 items-center justify-center border transition-colors duration-500',
           active
             ? 'border-neon/35 text-neon group-hover:border-neon group-hover:bg-neon/10'
-            : 'border-line text-mute/50',
+            : 'border-line text-mute/70',
         )}
       >
         <CHANNEL_ICON channel={channel} />
@@ -125,20 +127,20 @@ function ChannelRow({ channel, index }: { channel: Channel; index: number }) {
       <span className="min-w-0 flex-1">
         <span
           className={cn(
-            'font-tech block text-[0.58rem] tracking-[0.18em] transition-colors duration-400',
+            'font-tech block text-[0.66rem] tracking-[0.18em] transition-colors duration-400',
             active ? 'text-bone group-hover:text-neon' : 'text-mute/70',
           )}
         >
           {channel.label.toUpperCase()}
         </span>
-        <span className="font-tech mt-1 block truncate text-[0.62rem] tracking-[0.14em] text-mute/45">
+        <span className="font-tech mt-1 block truncate text-[0.7rem] tracking-[0.14em] text-mute/65">
           {channel.handle ?? contact.pendingLabel}
         </span>
       </span>
       <span
         className={cn(
-          'font-tech flex shrink-0 items-center gap-1 text-[0.62rem] tracking-[0.16em] transition-all duration-400',
-          active ? 'text-neon/70 group-hover:translate-x-0.5 group-hover:text-neon' : 'text-mute/30',
+          'font-tech flex shrink-0 items-center gap-1 text-[0.7rem] tracking-[0.16em] transition-all duration-400',
+          active ? 'text-neon/70 group-hover:translate-x-0.5 group-hover:text-neon' : 'text-mute/70',
         )}
       >
         {active ? (
@@ -187,10 +189,24 @@ const TYPE_LINES = [
 
 function HandshakeTerminal() {
   const ref = useRef<HTMLDivElement>(null)
-  const inView = useInView(ref, { once: true, amount: 0.5 })
+  const inView = useInView(ref, { once: true, amount: 0.15 })
   const reduce = useReducedMotion()
   const [visibleLines, setVisibleLines] = useState(0)
   const [typed, setTyped] = useState('')
+
+  // Fallback: if the panel is scrolled past faster than the observer can
+  // report, still finish the transcript shortly after mount.
+  useEffect(() => {
+    if (inView || reduce) return
+    const id = window.setTimeout(() => {
+      const rect = ref.current?.getBoundingClientRect()
+      if (rect && rect.top < window.innerHeight) {
+        setTyped(TYPE_LINES[0].text)
+        setVisibleLines(TYPE_LINES.length)
+      }
+    }, 2500)
+    return () => window.clearTimeout(id)
+  }, [inView, reduce])
 
   // typewriter for the first command, then reveal the rest line by line
   useEffect(() => {
@@ -221,32 +237,35 @@ function HandshakeTerminal() {
   return (
     <div ref={ref} className="relative max-w-md overflow-hidden border border-line-soft bg-[#070b08]">
       <div className="flex items-center justify-between border-b border-line-soft px-3.5 py-2">
-        <span className="font-tech text-[0.62rem] tracking-[0.2em] text-mute/60">SECURE HANDSHAKE</span>
-        <span className="font-tech flex items-center gap-1.5 text-[0.54rem] tracking-[0.16em] text-neon/70">
+        <span className="font-tech text-[0.7rem] tracking-[0.2em] text-mute/75">SECURE HANDSHAKE</span>
+        <span className="font-tech flex items-center gap-1.5 text-[0.66rem] tracking-[0.16em] text-neon/70">
           <span className="h-1 w-1 rounded-full bg-neon animate-pulse-dot" aria-hidden="true" />
           LIVE
         </span>
       </div>
-      <div className="space-y-1.5 p-3.5" aria-live="polite">
-        <p className="font-tech text-[0.62rem] tracking-[0.1em] text-bone/85">
+      {/* Decorative transcript — identical content is exposed to assistive
+          tech in the paragraph below, so typing state never hides meaning. */}
+      <div className="space-y-1.5 p-3.5" aria-hidden="true">
+        <p className="font-tech text-[0.7rem] tracking-[0.1em] text-bone/85">
           <span className="text-neon">{TYPE_LINES[0].prompt}</span> {typed}
           {typed.length < TYPE_LINES[0].text.length && (
-            <span className="ml-0.5 inline-block h-3 w-[5px] translate-y-[1px] bg-neon animate-blink" aria-hidden="true" />
+            <span
+              className="ml-0.5 inline-block h-3 w-[5px] translate-y-[1px] bg-neon animate-blink"
+              aria-hidden="true"
+            />
           )}
         </p>
         {TYPE_LINES.slice(1).map((line, i) => (
-          <motion.p
+          <p
             key={line.text}
             className={cn(
-              'font-tech text-[0.6rem] tracking-[0.1em]',
-              line.tone === 'ok' ? 'text-emerald' : line.tone === 'cmd' ? 'text-bone/85' : 'text-mute/60',
+              'font-tech text-[0.7rem] tracking-[0.1em]',
+              reduce ? 'opacity-100' : visibleLines > i ? 'animate-type-reveal' : 'invisible opacity-0',
+              line.tone === 'ok' ? 'text-emerald' : line.tone === 'cmd' ? 'text-bone/85' : 'text-mute/75',
             )}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: visibleLines > i ? 1 : 0 }}
-            transition={{ duration: 0.35 }}
           >
-            <span className={line.tone === 'cmd' ? 'text-neon' : 'text-mute/40'}>{line.prompt}</span> {line.text}
-          </motion.p>
+            <span className={line.tone === 'cmd' ? 'text-neon' : 'text-mute/60'}>{line.prompt}</span> {line.text}
+          </p>
         ))}
       </div>
     </div>
@@ -257,7 +276,7 @@ function ClosingSequence() {
   const reduce = useReducedMotion()
   const ref = useRef<HTMLDivElement>(null)
   const inView = useInView(ref, { once: true, amount: 0.4 })
-  const [step, setStep] = useState(reduce ? contact.closing.length : 0)
+  const [step, setStep] = useState(0)
 
   useEffect(() => {
     if (!inView || reduce) return
@@ -279,11 +298,13 @@ function ClosingSequence() {
             <motion.p
               key={line}
               className={cn(
-                'font-tech text-[0.58rem] tracking-[0.26em] sm:text-[0.66rem]',
+                'font-tech text-[0.66rem] tracking-[0.26em] sm:text-[0.72rem]',
                 i === 0 ? 'text-emerald' : i === 1 ? 'text-bone/80' : 'text-mute',
               )}
-              initial={{ opacity: 0, y: reduce ? 0 : 8 }}
-              animate={{ opacity: step > i ? 1 : 0, y: 0 }}
+              /* Starts readable at low emphasis and resolves to full — a stalled
+                 timer can dim it but can never hide the line entirely. */
+              initial={false}
+              animate={{ opacity: step > i ? 1 : 0.45, y: 0 }}
               transition={{ duration: 0.6, ease: EASE_OUT_EXPO }}
             >
               {line}
@@ -308,7 +329,7 @@ function ClosingSequence() {
               className="group inline-flex items-baseline gap-1"
               aria-label="Back to the top of the page"
             >
-              <span className="font-display text-[clamp(1.9rem,7vw,4.4rem)] font-semibold uppercase leading-none tracking-[-0.04em] text-bone transition-colors duration-500 group-hover:text-neon">
+              <span className="font-display text-[clamp(1.9rem,7vw,4.4rem)] font-medium uppercase leading-none tracking-[-0.04em] text-bone transition-colors duration-500 group-hover:text-neon">
                 {brand.signature}
               </span>
               <span className="mb-2 inline-block h-[0.55em] w-[0.28em] bg-neon animate-blink sm:mb-3" aria-hidden="true" />
@@ -316,7 +337,7 @@ function ClosingSequence() {
           </Magnetic>
         </motion.div>
 
-        <p className="font-tech mt-4 text-[0.62rem] tracking-[0.24em] text-mute/40">
+        <p className="font-tech mt-4 text-[0.7rem] tracking-[0.24em] text-mute/60">
           END OF TRANSMISSION // ARCHIVE SEALED
         </p>
       </div>

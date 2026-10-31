@@ -15,6 +15,8 @@ type SectionHeadingProps = {
   children?: ReactNode
   /** Optional right-hand slot (metadata, notes, buttons). */
   aside?: ReactNode
+  /** Applied to the headline so sections can reference it via aria-labelledby. */
+  id?: string
 }
 
 /**
@@ -31,6 +33,7 @@ export function SectionHeading({
   align = 'left',
   children,
   aside,
+  id,
 }: SectionHeadingProps) {
   const reduce = useReducedMotion()
 
@@ -41,21 +44,21 @@ export function SectionHeading({
           'mb-6 flex flex-wrap items-center gap-x-4 gap-y-2 sm:mb-8',
           align === 'center' && 'justify-center',
         )}
-        initial={{ opacity: 0, y: reduce ? 0 : 12 }}
+        initial={reduce ? false : { opacity: 0, y: reduce ? 0 : 12 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.6 }}
+        viewport={{ once: true, amount: 'some', margin: '160% 0px 15% 0px' }}
         transition={{ duration: 0.7, ease: EASE_OUT_EXPO }}
       >
-        <span className="font-tech text-[0.66rem] tracking-[0.28em] text-neon">{index}</span>
-        <span className="font-tech text-[0.66rem] tracking-[0.28em] text-mute" aria-hidden="true">
+        <span className="font-tech text-[0.72rem] tracking-[0.28em] text-neon">{index}</span>
+        <span className="font-tech text-[0.72rem] tracking-[0.28em] text-mute" aria-hidden="true">
           //
         </span>
-        <span className="font-tech text-[0.66rem] tracking-[0.28em] text-mute">{label}</span>
+        <span className="font-tech text-[0.72rem] tracking-[0.28em] text-mute">{label}</span>
         <motion.span
           className="hidden h-px flex-1 origin-left bg-line sm:block"
-          initial={{ scaleX: 0 }}
+          initial={reduce ? false : { scaleX: 0 }}
           whileInView={{ scaleX: 1 }}
-          viewport={{ once: true, amount: 0.6 }}
+          viewport={{ once: true, amount: 'some', margin: '160% 0px 15% 0px' }}
           transition={{ duration: 1.2, ease: EASE_OUT_EXPO, delay: 0.15 }}
           aria-hidden="true"
         />
@@ -64,13 +67,14 @@ export function SectionHeading({
 
       <div className={cn('flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between', className)}>
         <MaskedLines
+          id={id}
           lines={lines}
           className={cn(
             'display-section text-bone',
             align === 'center' && 'text-center',
             headingClassName,
           )}
-          amount={0.3}
+          amount="some"
         />
         {children && (
           <div className={cn('max-w-md', align === 'center' && 'mx-auto text-center')}>{children}</div>

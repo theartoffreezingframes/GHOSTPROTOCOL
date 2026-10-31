@@ -46,7 +46,7 @@ export function Emblem({ className, animated = false, title = 'Ghost Protocol em
         stroke="url(#gp-ring)"
         strokeWidth="0.9"
         strokeDasharray="2 7"
-        className={animated ? 'origin-center motion-safe:[animation:gp-radar_38s_linear_infinite]' : undefined}
+        className={animated ? 'origin-center motion-safe:[animation:gp-radar_60s_linear_infinite]' : undefined}
         opacity="0.8"
       />
       <circle cx="60" cy="60" r="49" stroke="#39FF14" strokeOpacity="0.14" strokeWidth="0.6" />

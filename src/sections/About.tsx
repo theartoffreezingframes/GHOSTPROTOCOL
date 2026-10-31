@@ -64,18 +64,19 @@ export function About() {
 
       <div ref={ref} className="container-x relative z-10">
         <SectionHeading
+          id="protocol-heading"
           index={about.index}
           label={about.label}
           lines={about.heading}
           headingClassName="max-w-4xl"
           aside={
-            <span className="font-tech ml-auto hidden text-[0.6rem] tracking-[0.22em] text-mute/60 md:block">
+            <span className="font-tech ml-auto hidden text-[0.7rem] tracking-[0.22em] text-mute/75 md:block">
               FILE // <DecodeLabel value="GP-01" />
             </span>
           }
         >
           <Reveal delay={0.15}>
-            <p className="font-tech mb-3 text-[0.62rem] tracking-[0.24em] text-neon/80">MANIFESTO</p>
+            <p className="font-tech mb-3 text-[0.7rem] tracking-[0.24em] text-neon/80">MANIFESTO</p>
             <p className="text-[0.95rem] leading-relaxed text-mute">
               Built in the space between curiosity and discipline. We operate independently, compete relentlessly and
               ship what we imagine.
@@ -105,10 +106,10 @@ export function About() {
               <dl className="grid grid-cols-2 divide-line-soft border-y border-line-soft sm:grid-cols-4 sm:divide-x">
                 {about.stats.map((stat) => (
                   <div key={stat.label} className="px-0 py-5 sm:px-6 sm:first:pl-0">
-                    <dt className="font-tech text-[0.6rem] tracking-[0.2em] text-mute">{stat.label}</dt>
-                    <dd className="font-display mt-2 flex items-baseline gap-2 text-[2rem] font-semibold leading-none tracking-tight text-bone">
+                    <dt className="font-tech text-[0.7rem] tracking-[0.2em] text-mute">{stat.label}</dt>
+                    <dd className="font-display mt-2 flex items-baseline gap-2 text-[2rem] font-medium leading-none tracking-tight text-bone">
                       {stat.value}
-                      <span className="font-tech text-[0.58rem] tracking-[0.16em] text-neon/70">{stat.note}</span>
+                      <span className="font-tech text-[0.66rem] tracking-[0.16em] text-neon/70">{stat.note}</span>
                     </dd>
                   </div>
                 ))}
@@ -120,7 +121,7 @@ export function About() {
           <div className="lg:col-span-4 lg:col-start-9">
             <div className="lg:sticky lg:top-28">
               <div className="mb-5 flex items-center gap-3">
-                <span className="font-tech text-[0.6rem] tracking-[0.24em] text-mute">OUR PHILOSOPHY</span>
+                <span className="font-tech text-[0.7rem] tracking-[0.24em] text-mute">OUR PHILOSOPHY</span>
                 <motion.span
                   className="h-px flex-1 origin-left bg-neon/40"
                   style={reduce ? undefined : { scaleX: lineGrow }}
@@ -133,15 +134,15 @@ export function About() {
                   <motion.li
                     key={line}
                     className="group relative border-t border-line-soft py-5 last:border-b"
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={reduce ? false : { opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, amount: 0.6 }}
+                    viewport={{ once: true, amount: 'some', margin: '160% 0px 15% 0px' }}
                     transition={{ duration: 0.8, ease: EASE_OUT_EXPO, delay: 0.12 * i }}
                   >
-                    <span className="font-tech absolute right-0 top-5 text-[0.58rem] tracking-[0.2em] text-mute/50">
+                    <span className="font-tech absolute right-0 top-5 text-[0.66rem] tracking-[0.2em] text-mute/70">
                       0{i + 1}
                     </span>
-                    <span className="font-display block text-[1.35rem] font-semibold uppercase leading-tight tracking-[-0.02em] text-bone transition-colors duration-500 group-hover:text-neon sm:text-[1.55rem]">
+                    <span className="font-display block text-[1.35rem] font-medium uppercase leading-tight tracking-[-0.02em] text-bone transition-colors duration-500 group-hover:text-neon sm:text-[1.55rem]">
                       {line}
                     </span>
                   </motion.li>
@@ -153,7 +154,7 @@ export function About() {
                   <p className="text-[0.86rem] leading-relaxed text-mute">
                     “We don't announce ourselves. We leave evidence.”
                   </p>
-                  <footer className="font-tech mt-3 text-[0.6rem] tracking-[0.22em] text-neon/70">
+                  <footer className="font-tech mt-3 text-[0.7rem] tracking-[0.22em] text-neon/70">
                     {brand.name} // DOCTRINE
                   </footer>
                 </blockquote>

@@ -24,11 +24,12 @@ export function Projects() {
 
       <div className="container-x relative z-10">
         <SectionHeading
+          id="lab-heading"
           index={labMeta.index}
           label={labMeta.label}
           lines={labMeta.heading}
           aside={
-            <span className="font-tech ml-auto hidden items-center gap-2 text-[0.6rem] tracking-[0.22em] text-mute/70 md:flex">
+            <span className="font-tech ml-auto hidden items-center gap-2 text-[0.7rem] tracking-[0.22em] text-mute/70 md:flex">
               <FlaskConical size={9} aria-hidden="true" />
               BAYS // 03 OPEN
             </span>
@@ -61,30 +62,26 @@ export function Projects() {
 
               <div className="relative z-10 flex items-start justify-between">
                 <div>
-                  <p className="font-tech text-[0.6rem] tracking-[0.24em] text-neon/90">LAB STATUS</p>
-                  <p className="font-tech mt-1 text-[0.6rem] tracking-[0.2em] text-mute">BAYS ARE OPEN</p>
+                  <p className="font-tech text-[0.7rem] tracking-[0.24em] text-neon/90">LAB STATUS</p>
+                  <p className="font-tech mt-1 text-[0.7rem] tracking-[0.2em] text-mute">BAYS ARE OPEN</p>
                 </div>
                 <FlaskConical size={16} className="text-neon/60" aria-hidden="true" />
               </div>
 
               <div className="relative z-10 my-8 flex justify-center">
-                <motion.div
-                  className="h-28 w-28 opacity-90 sm:h-32 sm:w-32"
-                  animate={{ opacity: [0.75, 1, 0.75] }}
-                  transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-                >
+                <div className="h-28 w-28 opacity-90 sm:h-32 sm:w-32">
                   <Emblem animated title="Ghost Protocol lab emblem" />
-                </motion.div>
+                </div>
               </div>
 
               <div className="relative z-10">
-                <p className="font-display text-[1.6rem] font-semibold uppercase leading-none tracking-[-0.03em] text-bone sm:text-[1.9rem]">
+                <p className="font-display text-[1.6rem] font-medium uppercase leading-none tracking-[-0.03em] text-bone sm:text-[1.9rem]">
                   {labMeta.emptyLabel}
                 </p>
                 <p className="mt-3 max-w-xs text-[0.85rem] leading-relaxed text-mute">{labMeta.emptyNote}</p>
                 <div className="mt-5 flex items-center gap-2 border-t border-line-soft pt-4">
                   <RadioTower size={11} className="text-neon/60" aria-hidden="true" />
-                  <span className="font-tech text-[0.62rem] tracking-[0.18em] text-mute/60">
+                  <span className="font-tech text-[0.7rem] tracking-[0.18em] text-mute/75">
                     BUILDS PUBLISH AFTER VERIFICATION
                   </span>
                 </div>
@@ -115,9 +112,9 @@ function ProjectBay({ project, index }: { project: Project; index: number }) {
   return (
     <motion.div
       className="group relative overflow-hidden border border-line-soft bg-card/40 transition-colors duration-500 hover:border-neon/25"
-      initial={{ opacity: 0, y: 30 }}
+      initial={reduce ? false : { opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.4 }}
+      viewport={{ once: true, amount: 'some', margin: '160% 0px 15% 0px' }}
       transition={{ duration: 0.9, ease: EASE_OUT_EXPO, delay: index * 0.1 }}
     >
       {/* hover edge */}
@@ -127,17 +124,17 @@ function ProjectBay({ project, index }: { project: Project; index: number }) {
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        aria-controls={`${id}-body`}
+        {...(open ? { 'aria-controls': `${id}-body` } : {})}
         className="flex w-full items-center gap-4 px-4 py-4 text-left sm:px-5"
       >
-        <span className="font-tech w-6 shrink-0 text-[0.6rem] tracking-[0.18em] text-neon/60">
+        <span className="font-tech w-6 shrink-0 text-[0.7rem] tracking-[0.18em] text-neon/60">
           {project.index}
         </span>
         <span className="min-w-0 flex-1">
-          <span className="font-display block truncate text-[1.15rem] font-semibold uppercase leading-none tracking-[-0.02em] text-bone transition-colors duration-500 group-hover:text-neon sm:text-[1.35rem]">
+          <span className="font-display block truncate text-[1.15rem] font-medium uppercase leading-none tracking-[-0.02em] text-bone transition-colors duration-500 group-hover:text-neon sm:text-[1.35rem]">
             {project.name}
           </span>
-          <span className="font-tech mt-2 block text-[0.58rem] tracking-[0.2em] text-mute/60">
+          <span className="font-tech mt-2 block text-[0.66rem] tracking-[0.2em] text-mute/75">
             {hasContent ? (project.year ?? 'UNRELEASED') : 'UNASSIGNED BAY'}
           </span>
         </span>
@@ -167,7 +164,7 @@ function ProjectBay({ project, index }: { project: Project; index: number }) {
                 <p
                   className={cn(
                     'mt-1.5 text-[0.85rem] leading-relaxed',
-                    project.summary ? 'text-bone/85' : 'font-tech text-[0.58rem] tracking-[0.18em] text-mute/45',
+                    project.summary ? 'text-bone/85' : 'font-tech text-[0.66rem] tracking-[0.18em] text-mute/65',
                   )}
                 >
                   {project.summary ?? '[ PLACEHOLDER · AWAITING PROJECT BRIEF ]'}
@@ -176,14 +173,14 @@ function ProjectBay({ project, index }: { project: Project; index: number }) {
 
               <div>
                 <BayLabel>PROBLEM STATEMENT</BayLabel>
-                <p className="mt-1.5 font-tech text-[0.58rem] tracking-[0.18em] text-mute/45">
+                <p className="mt-1.5 font-tech text-[0.66rem] tracking-[0.18em] text-mute/65">
                   {project.problem ?? '[ NOT DECLASSIFIED ]'}
                 </p>
               </div>
 
               <div>
                 <BayLabel>SOLUTION</BayLabel>
-                <p className="mt-1.5 font-tech text-[0.58rem] tracking-[0.18em] text-mute/45">
+                <p className="mt-1.5 font-tech text-[0.66rem] tracking-[0.18em] text-mute/65">
                   {project.solution ?? '[ NOT DECLASSIFIED ]'}
                 </p>
               </div>
@@ -198,7 +195,7 @@ function ProjectBay({ project, index }: { project: Project; index: number }) {
                       </StatusPill>
                     ))
                   ) : (
-                    <span className="font-tech text-[0.58rem] tracking-[0.18em] text-mute/45">[ UNLISTED ]</span>
+                    <span className="font-tech text-[0.66rem] tracking-[0.18em] text-mute/65">[ UNLISTED ]</span>
                   )}
                 </div>
               </div>
@@ -232,7 +229,7 @@ function ProjectBay({ project, index }: { project: Project; index: number }) {
 }
 
 function BayLabel({ children }: { children: string }) {
-  return <p className="font-tech text-[0.58rem] tracking-[0.22em] text-neon/70">{children}</p>
+  return <p className="font-tech text-[0.66rem] tracking-[0.22em] text-neon/70">{children}</p>
 }
 
 function LinkSlot({ label, href, icon }: { label: string; href: string | null; icon: React.ReactNode }) {
@@ -242,7 +239,7 @@ function LinkSlot({ label, href, icon }: { label: string; href: string | null; i
         href={href}
         target="_blank"
         rel="noopener noreferrer"
-        className="font-tech inline-flex items-center gap-1.5 border border-neon/30 px-2 py-1 text-[0.58rem] tracking-[0.16em] text-neon transition-colors hover:bg-neon/10"
+        className="font-tech inline-flex items-center gap-1.5 border border-neon/30 px-2 py-1 text-[0.66rem] tracking-[0.16em] text-neon transition-colors hover:bg-neon/10"
       >
         {icon}
         {label}
@@ -250,7 +247,7 @@ function LinkSlot({ label, href, icon }: { label: string; href: string | null; i
     )
   }
   return (
-    <span className="font-tech inline-flex items-center gap-1.5 border border-line px-2 py-1 text-[0.58rem] tracking-[0.16em] text-mute/45">
+    <span className="font-tech inline-flex items-center gap-1.5 border border-line px-2 py-1 text-[0.66rem] tracking-[0.16em] text-mute/65">
       {icon}
       {label} · NONE
     </span>

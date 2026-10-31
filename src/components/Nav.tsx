@@ -105,13 +105,13 @@ export function Nav({ onNavigate, ready }: NavProps) {
               <span className="relative h-8 w-8 shrink-0 transition-transform duration-500 group-hover:scale-105">
                 <Emblem title="" />
               </span>
-              <span className="flex flex-col leading-none">
-                <span className="font-display text-[0.82rem] font-semibold uppercase tracking-[0.16em] text-bone">
+              <span className="flex min-w-0 flex-col leading-none">
+                <span className="font-display truncate text-[0.82rem] font-medium uppercase tracking-[0.16em] text-bone">
                   {brand.nameParts[0]}
                   <span className="text-neon"> </span>
                   {brand.nameParts[1]}
                 </span>
-                <span className="font-tech mt-1 hidden text-[0.58rem] tracking-[0.22em] text-mute sm:block">
+                <span className="font-tech mt-1 hidden text-[0.66rem] tracking-[0.22em] text-mute sm:block">
                   {brand.classification}
                 </span>
               </span>
@@ -130,16 +130,16 @@ export function Nav({ onNavigate, ready }: NavProps) {
                       go(item.id)
                     }}
                     className={cn(
-                      'group relative px-3 py-2 font-tech text-[0.6rem] tracking-[0.18em] transition-colors duration-300',
+                      'group relative px-2 py-2 font-tech text-[0.66rem] tracking-[0.16em] transition-colors duration-300 xl:px-3 xl:text-[0.7rem] xl:tracking-[0.18em]',
                       isActive ? 'text-neon' : 'text-mute hover:text-bone',
                     )}
                     aria-current={isActive ? 'true' : undefined}
                   >
-                    <span className="mr-1.5 text-[0.58rem] text-mute/60 group-hover:text-neon/70">{item.index}</span>
+                    <span className="mr-1.5 text-[0.66rem] text-mute/75 group-hover:text-neon/70">{item.index}</span>
                     {item.short.toUpperCase()}
                     <span
                       className={cn(
-                        'absolute inset-x-3 -bottom-0.5 h-px origin-left bg-neon transition-transform duration-500',
+                        'absolute inset-x-2 -bottom-0.5 h-px origin-left bg-neon transition-transform duration-500 xl:inset-x-3',
                         isActive ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100',
                       )}
                       aria-hidden="true"
@@ -153,7 +153,7 @@ export function Nav({ onNavigate, ready }: NavProps) {
               <button
                 type="button"
                 onClick={() => go('contact')}
-                className="group hidden items-center gap-2 border border-line px-4 py-2.5 font-tech text-[0.58rem] tracking-[0.18em] text-bone transition-colors duration-300 hover:border-neon/60 hover:text-neon md:inline-flex"
+                className="group hidden items-center gap-2 whitespace-nowrap border border-line px-3 py-2.5 font-tech text-[0.66rem] tracking-[0.18em] text-bone transition-colors duration-300 hover:border-neon/60 hover:text-neon xl:inline-flex"
               >
                 <span className="h-1 w-1 rounded-full bg-neon animate-pulse-dot" aria-hidden="true" />
                 ESTABLISH CONNECTION
@@ -165,7 +165,7 @@ export function Nav({ onNavigate, ready }: NavProps) {
                 className="relative flex h-10 w-10 items-center justify-center border border-line text-bone transition-colors hover:border-neon/60 hover:text-neon lg:hidden"
                 onClick={() => setOpen((v) => !v)}
                 aria-expanded={open}
-                aria-controls="mobile-menu"
+                {...(open ? { 'aria-controls': 'mobile-menu' } : {})}
                 aria-label={open ? 'Close navigation' : 'Open navigation'}
               >
                 {open ? <X size={16} aria-hidden="true" /> : <Menu size={16} aria-hidden="true" />}
@@ -211,8 +211,8 @@ export function Nav({ onNavigate, ready }: NavProps) {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, ease: EASE_OUT_EXPO, delay: 0.06 * i }}
                 >
-                  <span className="font-tech w-7 text-[0.6rem] tracking-[0.2em] text-neon/70">{item.index}</span>
-                  <span className="font-display text-[1.65rem] font-semibold uppercase leading-none text-bone transition-colors group-hover:text-neon">
+                  <span className="font-tech w-7 text-[0.7rem] tracking-[0.2em] text-neon/70">{item.index}</span>
+                  <span className="font-display text-[1.65rem] font-medium uppercase leading-none text-bone transition-colors group-hover:text-neon">
                     {item.label}
                   </span>
                   <span className="ml-auto text-mute transition-transform duration-300 group-hover:translate-x-1 group-hover:text-neon">
@@ -231,7 +231,7 @@ export function Nav({ onNavigate, ready }: NavProps) {
               <button type="button" className="btn btn-primary w-full" onClick={() => go('contact')}>
                 ESTABLISH CONNECTION
               </button>
-              <p className="font-tech text-center text-[0.6rem] tracking-[0.2em] text-mute/70">
+              <p className="font-tech text-center text-[0.7rem] tracking-[0.2em] text-mute/70">
                 {brand.name} // {brand.classification}
               </p>
             </motion.div>

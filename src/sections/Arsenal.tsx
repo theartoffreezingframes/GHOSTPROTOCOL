@@ -37,10 +37,11 @@ export function Arsenal() {
       <div className="container-x relative z-10">
         <SectionHeading
           index="05"
+          id="arsenal-heading"
           label="TECHNICAL ARSENAL"
           lines={['OUR TOOLS.', 'OUR CAPABILITIES.']}
           aside={
-            <span className="font-tech ml-auto hidden text-[0.6rem] tracking-[0.22em] text-mute/70 md:block">
+            <span className="font-tech ml-auto hidden text-[0.7rem] tracking-[0.22em] text-mute/70 md:block">
               INDEX // 04 CATEGORIES
             </span>
           }
@@ -62,7 +63,7 @@ export function Arsenal() {
                   <span className="h-2 w-2 rounded-full bg-line" aria-hidden="true" />
                   <span className="h-2 w-2 rounded-full bg-line" aria-hidden="true" />
                   <span className="h-2 w-2 rounded-full bg-neon/60" aria-hidden="true" />
-                  <span className="font-tech ml-2 text-[0.58rem] tracking-[0.2em] text-mute/70">
+                  <span className="font-tech ml-2 text-[0.66rem] tracking-[0.2em] text-mute/70">
                     ghost@protocol: ~/arsenal
                   </span>
                 </div>
@@ -71,7 +72,7 @@ export function Arsenal() {
 
               {/* log */}
               <div className="p-4 sm:p-6">
-                <p className="font-tech flex items-center gap-2 text-[0.6rem] tracking-[0.14em] text-bone/80">
+                <p className="font-tech flex items-center gap-2 text-[0.7rem] tracking-[0.14em] text-bone/80">
                   <span className="text-neon" aria-hidden="true">
                     →
                   </span>
@@ -89,9 +90,9 @@ export function Arsenal() {
                           'relative border-l transition-colors duration-500',
                           isActive ? 'border-neon/60' : 'border-line',
                         )}
-                        initial={{ opacity: 0, x: reduce ? 0 : -14 }}
+                        initial={reduce ? false : { opacity: 0, x: reduce ? 0 : -14 }}
                         whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true, amount: 0.4 }}
+                        viewport={{ once: true, amount: 'some', margin: '160% 0px 15% 0px' }}
                         transition={{ duration: 0.7, delay: catIndex * 0.1, ease: EASE_OUT_EXPO }}
                         onMouseEnter={() => setActiveCat(category.id)}
                       >
@@ -102,18 +103,18 @@ export function Arsenal() {
                           aria-pressed={isActive}
                           className="flex w-full flex-wrap items-baseline gap-x-3 gap-y-1 pl-3 text-left sm:pl-4"
                         >
-                          <span className="font-tech text-[0.58rem] tracking-[0.16em] text-neon/60">
+                          <span className="font-tech text-[0.66rem] tracking-[0.16em] text-neon/60">
                             [{category.index}]
                           </span>
                           <span
                             className={cn(
-                              'font-tech text-[0.62rem] tracking-[0.16em] transition-colors duration-300',
+                              'font-tech text-[0.7rem] tracking-[0.16em] transition-colors duration-300',
                               isActive ? 'text-neon' : 'text-bone/80',
                             )}
                           >
                             {category.title}
                           </span>
-                          <span className="font-tech ml-auto hidden text-[0.62rem] tracking-[0.16em] text-mute/50 sm:block">
+                          <span className="font-tech ml-auto hidden text-[0.7rem] tracking-[0.16em] text-mute/70 sm:block">
                             {category.note}
                           </span>
                         </button>
@@ -122,9 +123,9 @@ export function Arsenal() {
                           {category.items.map((item, i) => (
                             <motion.li
                               key={item}
-                              initial={{ opacity: 0, y: reduce ? 0 : 8 }}
+                              initial={reduce ? false : { opacity: 0, y: reduce ? 0 : 8 }}
                               whileInView={{ opacity: 1, y: 0 }}
-                              viewport={{ once: true, amount: 0.6 }}
+                              viewport={{ once: true, amount: 'some', margin: '160% 0px 15% 0px' }}
                               transition={{ duration: 0.45, delay: catIndex * 0.08 + i * 0.045, ease: EASE_OUT_EXPO }}
                             >
                               <SkillTag label={item} active={isActive} />
@@ -136,7 +137,7 @@ export function Arsenal() {
                   })}
                 </div>
 
-                <p className="font-tech mt-6 border-t border-line-soft pt-4 text-[0.58rem] leading-relaxed tracking-[0.14em] text-mute/50">
+                <p className="font-tech mt-6 border-t border-line-soft pt-4 text-[0.66rem] leading-relaxed tracking-[0.14em] text-mute/70">
                   {arsenalDisclaimer}
                 </p>
               </div>
@@ -153,7 +154,7 @@ export function Arsenal() {
             <Reveal delay={0.1} y={30}>
               <div className="relative border border-line-soft bg-card/40 p-5 sm:p-6">
                 <div className="mb-5 flex items-center justify-between">
-                  <span className="font-tech text-[0.58rem] tracking-[0.22em] text-mute">CAPABILITY MATRIX</span>
+                  <span className="font-tech text-[0.66rem] tracking-[0.22em] text-mute">CAPABILITY MATRIX</span>
                   <Cpu size={12} className="text-neon/60" aria-hidden="true" />
                 </div>
 
@@ -166,13 +167,13 @@ export function Arsenal() {
                         <div className="mb-1.5 flex items-baseline justify-between gap-2">
                           <span
                             className={cn(
-                              'font-tech text-[0.58rem] tracking-[0.18em] transition-colors duration-300',
+                              'font-tech text-[0.66rem] tracking-[0.18em] transition-colors duration-300',
                               isActive ? 'text-neon' : 'text-mute/80',
                             )}
                           >
                             {category.title}
                           </span>
-                          <span className="font-tech text-[0.62rem] tracking-[0.16em] text-mute/50">
+                          <span className="font-tech text-[0.7rem] tracking-[0.16em] text-mute/70">
                             {String(category.items.length).padStart(2, '0')} TOOLS
                           </span>
                         </div>
@@ -182,9 +183,9 @@ export function Arsenal() {
                               'h-full origin-left transition-colors duration-500',
                               isActive ? 'bg-neon' : 'bg-emerald/50',
                             )}
-                            initial={{ scaleX: 0 }}
+                            initial={reduce ? false : { scaleX: 0 }}
                             whileInView={{ scaleX: pct / 100 }}
-                            viewport={{ once: true, amount: 0.8 }}
+                            viewport={{ once: true, amount: 'some', margin: '160% 0px 15% 0px' }}
                             transition={{ duration: 1.2, ease: EASE_OUT_EXPO, delay: 0.1 }}
                           />
                         </div>
@@ -194,7 +195,7 @@ export function Arsenal() {
                 </div>
 
                 <div className="mt-6 border-t border-line-soft pt-4">
-                  <p className="font-tech text-[0.62rem] leading-relaxed tracking-[0.16em] text-mute/45">
+                  <p className="font-tech text-[0.7rem] leading-relaxed tracking-[0.16em] text-mute/65">
                     BARS REFLECT CATEGORY WIDTH, NOT PROFICIENCY SCORES. EVERY OPERATIVE SPECIALISES DIFFERENTLY.
                   </p>
                 </div>
@@ -211,13 +212,16 @@ function SkillTag({ label, active }: { label: string; active: boolean }) {
   return (
     <span
       className={cn(
-        'font-tech inline-flex cursor-default items-center gap-1.5 border px-2 py-1 text-[0.58rem] tracking-[0.14em] transition-all duration-400',
+        'font-tech inline-flex items-center gap-1.5 border px-2 py-1 text-[0.66rem] tracking-[0.14em] transition-all duration-400',
         active
           ? 'border-neon/35 bg-neon/[0.06] text-neon'
-          : 'border-line text-mute/80 hover:border-neon/30 hover:text-bone',
+          : 'border-line text-mute/80',
       )}
     >
-      <span className={cn('h-[3px] w-[3px]', active ? 'bg-neon' : 'bg-mute/50')} aria-hidden="true" />
+      <span
+        className={cn('h-[3px] w-[3px] transition-colors duration-400', active ? 'bg-neon' : 'bg-mute/50')}
+        aria-hidden="true"
+      />
       {label}
     </span>
   )

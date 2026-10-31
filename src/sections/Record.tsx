@@ -41,11 +41,12 @@ export function Record() {
 
       <div className="container-x relative z-10">
         <SectionHeading
+          id="record-heading"
           index="06"
           label="RECORD OF OPERATIONS"
           lines={['EVERY MISSION', 'LEAVES A MARK.']}
           aside={
-            <span className="font-tech ml-auto hidden text-[0.6rem] tracking-[0.22em] text-mute/70 md:block">
+            <span className="font-tech ml-auto hidden text-[0.7rem] tracking-[0.22em] text-mute/70 md:block">
               VERIFIED ENTRIES ONLY
             </span>
           }
@@ -75,9 +76,9 @@ export function Record() {
                   <motion.li
                     key={entry.id}
                     className="group relative pb-8 last:pb-0"
-                    initial={{ opacity: 0, x: reduce ? 0 : 22 }}
+                    initial={reduce ? false : { opacity: 0, x: reduce ? 0 : 22 }}
                     whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true, amount: 0.6 }}
+                    viewport={{ once: true, amount: 'some', margin: '160% 0px 15% 0px' }}
                     transition={{ duration: 0.85, ease: EASE_OUT_EXPO, delay: index * 0.08 }}
                   >
                     {/* node */}
@@ -96,14 +97,14 @@ export function Record() {
                             {entry.type}
                           </span>
                         </StatusPill>
-                        <span className="font-tech text-[0.62rem] tracking-[0.2em] text-mute/50">
+                        <span className="font-tech text-[0.7rem] tracking-[0.2em] text-mute/70">
                           {entry.year ?? 'UNDATED'}
                         </span>
-                        <span className="font-tech ml-auto text-[0.62rem] tracking-[0.18em] text-emerald/80">
+                        <span className="font-tech ml-auto text-[0.7rem] tracking-[0.18em] text-emerald/80">
                           VERIFIED
                         </span>
                       </div>
-                      <h3 className="font-display text-[1.25rem] font-semibold uppercase leading-tight tracking-[-0.02em] text-bone transition-colors duration-500 group-hover:text-neon sm:text-[1.5rem]">
+                      <h3 className="font-display text-[1.25rem] font-medium uppercase leading-tight tracking-[-0.02em] text-bone transition-colors duration-500 group-hover:text-neon sm:text-[1.5rem]">
                         {entry.title}
                       </h3>
                       {entry.detail && (
@@ -121,7 +122,7 @@ export function Record() {
             <Reveal delay={0.15}>
               <div className="relative border border-line-soft bg-card/40 p-5 sm:p-6">
                 <div className="mb-4 flex items-center justify-between">
-                  <span className="font-tech text-[0.58rem] tracking-[0.22em] text-mute">RECORD INTEGRITY</span>
+                  <span className="font-tech text-[0.66rem] tracking-[0.22em] text-mute">RECORD INTEGRITY</span>
                   <ShieldQuestion size={13} className="text-neon/60" aria-hidden="true" />
                 </div>
 
@@ -133,13 +134,13 @@ export function Record() {
                     { label: 'CERTIFICATIONS', count: records.filter((r) => r.type === 'CERTIFICATION').length },
                   ].map((row) => (
                     <div key={row.label} className="flex items-center justify-between gap-3">
-                      <span className="font-tech text-[0.58rem] tracking-[0.18em] text-mute/80">{row.label}</span>
+                      <span className="font-tech text-[0.66rem] tracking-[0.18em] text-mute/80">{row.label}</span>
                       <div className="flex flex-1 items-center gap-2 pl-3">
                         <span className="h-px flex-1 bg-line" aria-hidden="true" />
                         <span
                           className={cn(
-                            'font-tech text-[0.62rem] tabular-nums',
-                            row.count > 0 ? 'text-neon' : 'text-mute/40',
+                            'font-tech text-[0.7rem] tabular-nums',
+                            row.count > 0 ? 'text-neon' : 'text-mute/60',
                           )}
                         >
                           {row.count > 0 ? String(row.count).padStart(2, '0') : '—'}

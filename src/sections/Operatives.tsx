@@ -42,11 +42,12 @@ export function Operatives() {
 
       <div className="container-x relative z-10">
         <SectionHeading
+          id="operatives-heading"
           index="02"
           label="OPERATIVE DATABASE"
           lines={['THREE MINDS.', 'ONE PROTOCOL.']}
           aside={
-            <span className="font-tech ml-auto hidden items-center gap-2 text-[0.6rem] tracking-[0.22em] text-mute/70 md:flex">
+            <span className="font-tech ml-auto hidden items-center gap-2 text-[0.7rem] tracking-[0.22em] text-mute/70 md:flex">
               <Lock size={9} aria-hidden="true" />
               CLEARANCE // {operativeMeta.count} ACTIVE
             </span>
@@ -65,7 +66,7 @@ export function Operatives() {
 
         <Reveal delay={0.15} className="mt-10 flex items-center gap-3 border-t border-line-soft pt-6">
           <ScanFace size={13} className="shrink-0 text-neon/60" aria-hidden="true" />
-          <p className="font-tech text-[0.6rem] leading-relaxed tracking-[0.18em] text-mute/70">
+          <p className="font-tech text-[0.7rem] leading-relaxed tracking-[0.18em] text-mute/70">
             IDENTITIES VERIFIED // PERSONAL CHANNELS AND TECHNICAL SKILLS APPEAR HERE ONCE SUPPLIED.
           </p>
         </Reveal>
@@ -111,9 +112,9 @@ function OperativeCard({ operative, index }: { operative: Operative; index: numb
   return (
     <motion.article
       className="group relative"
-      initial={{ opacity: 0, y: 42 }}
+      initial={reduce ? false : { opacity: 0, y: 42 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.2 }}
+      viewport={{ once: true, amount: 'some', margin: '160% 0px 15% 0px' }}
       transition={{ duration: 1, ease: EASE_OUT_EXPO, delay: index * 0.12 }}
     >
       <motion.div
@@ -178,10 +179,10 @@ function OperativeCard({ operative, index }: { operative: Operative; index: numb
 
           {/* top metadata */}
           <div className="absolute inset-x-0 top-0 z-30 flex items-start justify-between p-4">
-            <span className="font-tech text-[0.6rem] tracking-[0.24em] text-neon/90">
+            <span className="font-tech text-[0.7rem] tracking-[0.24em] text-neon/90">
               OPERATIVE {operative.number}
             </span>
-            <span className="font-tech flex items-center gap-1.5 text-[0.58rem] tracking-[0.2em] text-mute">
+            <span className="font-tech flex items-center gap-1.5 text-[0.66rem] tracking-[0.2em] text-mute">
               <span className="h-1 w-1 rounded-full bg-neon animate-pulse-dot" aria-hidden="true" />
               ACTIVE
             </span>
@@ -189,25 +190,25 @@ function OperativeCard({ operative, index }: { operative: Operative; index: numb
 
           {/* name lockup */}
           <div className="absolute inset-x-0 bottom-0 z-30 p-4 sm:p-5">
-            <p className="font-tech mb-2 text-[0.6rem] tracking-[0.26em] text-bone/60">
+            <p className="font-tech mb-2 text-[0.7rem] tracking-[0.26em] text-bone/75">
               {operative.designation}
             </p>
             <h3
-              className="font-display text-[clamp(2rem,5vw,2.9rem)] font-semibold uppercase leading-[0.9] tracking-[-0.04em] text-bone"
+              className="font-display text-[clamp(2rem,5vw,2.9rem)] font-medium uppercase leading-[0.9] tracking-[-0.04em] text-bone"
               id={`${id}-name`}
             >
               {operative.codename}
             </h3>
             <div className="mt-3 flex items-center gap-3">
               <span className="h-px flex-1 bg-line" aria-hidden="true" />
-              <span className="font-tech text-[0.58rem] tracking-[0.22em] text-mute">{operative.role}</span>
+              <span className="font-tech text-[0.66rem] tracking-[0.22em] text-mute">{operative.role}</span>
             </div>
           </div>
         </div>
 
         {/* dossier body */}
         <div className="relative z-30 flex flex-1 flex-col p-4 sm:p-5">
-          <p className="font-tech text-[0.6rem] tracking-[0.22em] text-mute/70">FULL NAME</p>
+          <p className="font-tech text-[0.7rem] tracking-[0.22em] text-mute/70">FULL NAME</p>
           <p className="mt-1.5 text-[0.92rem] font-medium uppercase tracking-[0.05em] text-bone">
             {operative.fullName}
           </p>
@@ -234,10 +235,10 @@ function OperativeCard({ operative, index }: { operative: Operative; index: numb
                 id={`${id}-detail`}
               >
                 <div className="mt-4 border-t border-line-soft pt-4">
-                  <p className="font-tech mb-2 text-[0.58rem] tracking-[0.22em] text-neon/70">PROFILE</p>
+                  <p className="font-tech mb-2 text-[0.66rem] tracking-[0.22em] text-neon/70">PROFILE</p>
                   <p className="text-[0.8rem] leading-relaxed text-mute">{operative.profile}</p>
 
-                  <p className="font-tech mb-2 mt-4 text-[0.58rem] tracking-[0.22em] text-neon/70">TECHNICAL SKILLS</p>
+                  <p className="font-tech mb-2 mt-4 text-[0.66rem] tracking-[0.22em] text-neon/70">TECHNICAL SKILLS</p>
                   {operative.skills.length > 0 ? (
                     <ul className="flex flex-wrap gap-1.5">
                       {operative.skills.map((skill) => (
@@ -247,12 +248,12 @@ function OperativeCard({ operative, index }: { operative: Operative; index: numb
                       ))}
                     </ul>
                   ) : (
-                    <p className="font-tech text-[0.58rem] tracking-[0.18em] text-mute/50">
+                    <p className="font-tech text-[0.66rem] tracking-[0.18em] text-mute/70">
                       NOT ON RECORD // AWAITING SUPPLY
                     </p>
                   )}
 
-                  <p className="font-tech mb-2 mt-4 text-[0.58rem] tracking-[0.22em] text-neon/70">CHANNELS</p>
+                  <p className="font-tech mb-2 mt-4 text-[0.66rem] tracking-[0.22em] text-neon/70">CHANNELS</p>
                   {operative.socials.length > 0 ? (
                     <ul className="flex flex-wrap gap-2">
                       {operative.socials.map((social) => (
@@ -261,7 +262,7 @@ function OperativeCard({ operative, index }: { operative: Operative; index: numb
                             href={social.href}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="font-tech inline-flex items-center gap-1.5 border border-line px-2 py-1 text-[0.58rem] tracking-[0.16em] text-bone transition-colors hover:border-neon/60 hover:text-neon"
+                            className="font-tech inline-flex items-center gap-1.5 border border-line px-2 py-1 text-[0.66rem] tracking-[0.16em] text-bone transition-colors hover:border-neon/60 hover:text-neon"
                           >
                             <span aria-hidden="true">{SOCIAL_ICON[social.platform] ?? '↗'}</span>
                             {social.label}
@@ -271,7 +272,7 @@ function OperativeCard({ operative, index }: { operative: Operative; index: numb
                       ))}
                     </ul>
                   ) : (
-                    <p className="font-tech text-[0.58rem] tracking-[0.18em] text-mute/50">
+                    <p className="font-tech text-[0.66rem] tracking-[0.18em] text-mute/70">
                       NO PUBLIC CHANNEL ON FILE
                     </p>
                   )}
@@ -285,13 +286,13 @@ function OperativeCard({ operative, index }: { operative: Operative; index: numb
               type="button"
               onClick={() => setOpen((v) => !v)}
               aria-expanded={open}
-              aria-controls={`${id}-detail`}
-              className="font-tech group/btn flex w-full items-center justify-between border-t border-line-soft pt-3 text-[0.6rem] tracking-[0.2em] text-mute transition-colors hover:text-neon"
+              {...(open ? { 'aria-controls': `${id}-detail` } : {})}
+              className="font-tech group/btn flex w-full items-center justify-between border-t border-line-soft py-3 text-[0.7rem] tracking-[0.2em] text-mute transition-colors hover:text-neon focus-visible:text-neon"
             >
               {open ? 'CLOSE DOSSIER' : 'OPEN DOSSIER'}
               <span
                 className={cn(
-                  'flex h-5 w-5 items-center justify-center border border-line transition-all duration-500 group-hover/btn:border-neon/60',
+                  'flex h-6 w-6 items-center justify-center border border-line transition-all duration-500 group-hover/btn:border-neon/60 group-hover/btn:bg-neon/10 group-focus-visible/btn:border-neon/60',
                   open && 'rotate-45',
                 )}
               >
@@ -312,7 +313,7 @@ function OperativeCard({ operative, index }: { operative: Operative; index: numb
       {/* hover hint for command / intel / stealth */}
       <div className="pointer-events-none absolute -top-3 right-3 z-40 flex items-center gap-1.5 opacity-0 transition-opacity duration-500 group-hover:opacity-100">
         <Crosshair size={10} className="text-neon" aria-hidden="true" />
-        <span className="font-tech text-[0.62rem] tracking-[0.2em] text-neon/80">
+        <span className="font-tech text-[0.7rem] tracking-[0.2em] text-neon/80">
           {operative.signature === 'command' ? 'COMMAND' : operative.signature === 'intelligence' ? 'INTEL' : 'STEALTH'}
         </span>
       </div>

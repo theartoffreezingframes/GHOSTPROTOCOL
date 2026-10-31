@@ -28,11 +28,12 @@ export function Missions() {
 
       <div className="container-x relative z-10">
         <SectionHeading
+          id="missions-heading"
           index="03"
           label={missionMeta.label}
           lines={missionMeta.heading}
           aside={
-            <span className="font-tech ml-auto hidden items-center gap-2 text-[0.6rem] tracking-[0.22em] text-mute/70 md:flex">
+            <span className="font-tech ml-auto hidden items-center gap-2 text-[0.7rem] tracking-[0.22em] text-mute/70 md:flex">
               <Archive size={9} aria-hidden="true" />
               ARCHIVE // 02 COMPLETE
             </span>
@@ -68,9 +69,9 @@ function MissionRecord({ mission, index }: { mission: Mission; index: number }) 
   return (
     <motion.article
       className="group relative overflow-hidden border border-line-soft bg-card/40 transition-colors duration-500 hover:border-neon/25"
-      initial={{ opacity: 0, y: 40 }}
+      initial={reduce ? false : { opacity: 0, y: 40 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.15 }}
+      viewport={{ once: true, amount: 'some', margin: '160% 0px 15% 0px' }}
       transition={{ duration: 1, ease: EASE_OUT_EXPO, delay: index * 0.08 }}
     >
       <div className="grid grid-cols-1 lg:grid-cols-12">
@@ -113,14 +114,14 @@ function MissionRecord({ mission, index }: { mission: Mission; index: number }) 
           {/* archive stamp */}
           <div className="absolute left-4 top-4 z-20 flex items-center gap-2 border border-emerald/30 bg-void/70 px-2.5 py-1 backdrop-blur-sm sm:left-5 sm:top-5">
             <Check size={9} className="text-emerald" aria-hidden="true" />
-            <span className="font-tech text-[0.58rem] tracking-[0.2em] text-emerald">ARCHIVED</span>
+            <span className="font-tech text-[0.66rem] tracking-[0.2em] text-emerald">ARCHIVED</span>
           </div>
 
           <div className="absolute bottom-4 left-4 z-20 flex items-center gap-2 sm:bottom-5 sm:left-5">
-            <span className="font-tech text-[2.4rem] font-light leading-none tracking-[-0.04em] text-bone/25 sm:text-[3.2rem]">
+            <span className="font-tech text-[2.4rem] font-light leading-none tracking-[-0.04em] text-bone/40 sm:text-[3.2rem]">
               {mission.number}
             </span>
-            <span className="font-tech pb-1 text-[0.58rem] tracking-[0.22em] text-mute/60">MISSION FILE</span>
+            <span className="font-tech pb-1 text-[0.66rem] tracking-[0.22em] text-mute/75">MISSION FILE</span>
           </div>
         </div>
 
@@ -141,7 +142,7 @@ function MissionRecord({ mission, index }: { mission: Mission; index: number }) 
               ))}
             </div>
 
-            <h3 className="font-display text-[clamp(1.5rem,3.4vw,2.15rem)] font-semibold uppercase leading-[0.98] tracking-[-0.035em] text-bone">
+            <h3 className="font-display text-[clamp(1.5rem,3.4vw,2.15rem)] font-medium uppercase leading-[0.98] tracking-[-0.035em] text-bone">
               {mission.title}
             </h3>
 
@@ -163,8 +164,8 @@ function MissionRecord({ mission, index }: { mission: Mission; index: number }) 
               type="button"
               onClick={() => setOpen((v) => !v)}
               aria-expanded={open}
-              aria-controls={`${id}-panel`}
-              className="font-tech flex w-full items-center justify-between border-t border-line-soft pt-4 text-[0.6rem] tracking-[0.2em] text-bone/80 transition-colors hover:text-neon"
+              {...(open ? { 'aria-controls': `${id}-panel` } : {})}
+              className="font-tech flex w-full items-center justify-between border-t border-line-soft pt-4 text-[0.7rem] tracking-[0.2em] text-bone/80 transition-colors hover:text-neon"
             >
               {open ? 'COLLAPSE MISSION RECORD' : 'OPEN MISSION RECORD'}
               <ChevronDown
@@ -193,15 +194,15 @@ function MissionRecord({ mission, index }: { mission: Mission; index: number }) 
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.45, delay: 0.04 * i, ease: EASE_OUT_EXPO }}
                       >
-                        <span className="font-tech mt-[3px] w-5 shrink-0 text-[0.62rem] tracking-[0.16em] text-neon/50">
+                        <span className="font-tech mt-[3px] w-5 shrink-0 text-[0.7rem] tracking-[0.16em] text-neon/50">
                           {String(i + 1).padStart(2, '0')}
                         </span>
                         <div className="min-w-0">
-                          <p className="font-tech text-[0.58rem] tracking-[0.18em] text-mute/80">{field.label}</p>
+                          <p className="font-tech text-[0.66rem] tracking-[0.18em] text-mute/80">{field.label}</p>
                           <p
                             className={cn(
                               'mt-1 text-[0.8rem] leading-snug',
-                              field.value ? 'text-bone/90' : 'font-tech text-[0.58rem] tracking-[0.18em] text-mute/45',
+                              field.value ? 'text-bone/90' : 'font-tech text-[0.66rem] tracking-[0.18em] text-mute/65',
                             )}
                           >
                             {field.value ?? '[ ENCRYPTED · AWAITING SUPPLY ]'}
@@ -219,15 +220,15 @@ function MissionRecord({ mission, index }: { mission: Mission; index: number }) 
 
       {/* footer metadata strip */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line-soft bg-void/40 px-5 py-2.5 sm:px-7">
-        <span className="font-tech flex items-center gap-2 text-[0.58rem] tracking-[0.2em] text-mute/60">
+        <span className="font-tech flex items-center gap-2 text-[0.66rem] tracking-[0.2em] text-mute/75">
           <ScanLine size={9} aria-hidden="true" />
           FILE {mission.number} // {mission.codename}
         </span>
-        <span className="font-tech flex items-center gap-2 text-[0.58rem] tracking-[0.2em] text-mute/60">
+        <span className="font-tech flex items-center gap-2 text-[0.66rem] tracking-[0.2em] text-mute/75">
           <FileLock2 size={9} aria-hidden="true" />
           CLEARANCE GRANTED
         </span>
-        <span className="font-tech hidden items-center gap-2 text-[0.58rem] tracking-[0.2em] text-mute/60 sm:flex">
+        <span className="font-tech hidden items-center gap-2 text-[0.66rem] tracking-[0.2em] text-mute/75 sm:flex">
           <MapPin size={9} aria-hidden="true" />
           SECTOR UNLISTED
         </span>
@@ -239,10 +240,10 @@ function MissionRecord({ mission, index }: { mission: Mission; index: number }) 
 function Meta({ label, value, accent, muted }: { label: string; value: string; accent?: boolean; muted?: boolean }) {
   return (
     <div>
-      <dt className="font-tech text-[0.62rem] tracking-[0.2em] text-mute/60">{label}</dt>
+      <dt className="font-tech text-[0.7rem] tracking-[0.2em] text-mute/75">{label}</dt>
       <dd
         className={cn(
-          'font-tech mt-1 truncate text-[0.62rem] tracking-[0.14em]',
+          'font-tech mt-1 truncate text-[0.7rem] tracking-[0.14em]',
           accent && 'text-emerald',
           muted && 'text-mute/70',
           !accent && !muted && 'text-bone/85',

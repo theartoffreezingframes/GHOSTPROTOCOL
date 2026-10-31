@@ -11,8 +11,8 @@ type BootSequenceProps = {
   skipped: boolean
 }
 
-const LINE_DELAY = 320
-const START_DELAY = 260
+const LINE_DELAY = 170
+const START_DELAY = 160
 
 /**
  * Terminal initialisation. Short, skippable, never replayed once
@@ -30,7 +30,7 @@ export function BootSequence({ onComplete, skipped }: BootSequenceProps) {
     if (finished.current) return
     finished.current = true
     setLeaving(true)
-    window.setTimeout(onComplete, 780)
+    window.setTimeout(onComplete, 620)
   }, [onComplete])
 
   // Reduced motion / returning visitors exit immediately.
@@ -56,9 +56,10 @@ export function BootSequence({ onComplete, skipped }: BootSequenceProps) {
       window.setTimeout(() => {
         setGranted(true)
         setProgress(100)
-      }, START_DELAY + boot.lines.length * LINE_DELAY + 240),
+      }, START_DELAY + boot.lines.length * LINE_DELAY + 140),
     )
-    timers.push(window.setTimeout(finish, START_DELAY + boot.lines.length * LINE_DELAY + 1180))
+    // Brief hold on ACCESS GRANTED, then hand off to the site.
+    timers.push(window.setTimeout(finish, START_DELAY + boot.lines.length * LINE_DELAY + 560))
     return () => timers.forEach(clearTimeout)
   }, [finish, reduce, skipped])
 
@@ -84,7 +85,7 @@ export function BootSequence({ onComplete, skipped }: BootSequenceProps) {
           className="fixed inset-0 z-[200] flex flex-col overflow-hidden bg-void"
           initial={{ opacity: 1 }}
           exit={{ opacity: 0, filter: 'blur(6px)' }}
-          transition={{ duration: 0.75, ease: EASE_OUT_EXPO }}
+          transition={{ duration: 0.55, ease: EASE_OUT_EXPO }}
         >
           {/* ambient layers */}
           <div className="pointer-events-none absolute inset-0 grid-bg opacity-40" aria-hidden="true" />
@@ -140,7 +141,7 @@ export function BootSequence({ onComplete, skipped }: BootSequenceProps) {
 
               <div className="overflow-hidden">
                 <motion.h1
-                  className="font-display text-[clamp(2.1rem,9vw,4.6rem)] font-semibold uppercase leading-[0.9] tracking-[-0.04em] text-bone"
+                  className="font-display text-[clamp(2.1rem,9vw,4.6rem)] font-medium uppercase leading-[0.9] tracking-[-0.04em] text-bone"
                   initial={{ y: '110%' }}
                   animate={{ y: '0%' }}
                   transition={{ duration: 1, ease: EASE_OUT_EXPO, delay: 0.2 }}
@@ -150,7 +151,7 @@ export function BootSequence({ onComplete, skipped }: BootSequenceProps) {
               </div>
 
               <motion.p
-                className="font-tech mt-3 text-[0.66rem] text-neon sm:text-[0.72rem]"
+                className="font-tech mt-3 text-[0.72rem] text-neon sm:text-[0.72rem]"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.6, delay: 0.55 }}
@@ -169,7 +170,7 @@ export function BootSequence({ onComplete, skipped }: BootSequenceProps) {
                   {boot.lines.slice(0, visibleLines).map((line) => (
                     <motion.li
                       key={line}
-                      className="font-tech flex items-baseline gap-2 text-[0.6rem] tracking-[0.16em] text-mute sm:text-[0.66rem]"
+                      className="font-tech flex items-baseline gap-2 text-[0.7rem] tracking-[0.16em] text-mute sm:text-[0.72rem]"
                       initial={{ opacity: 0, x: -8 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ duration: 0.4, ease: EASE_OUT_EXPO }}
@@ -204,7 +205,7 @@ export function BootSequence({ onComplete, skipped }: BootSequenceProps) {
 
             {/* bottom progress */}
             <div className="w-full">
-              <div className="mb-2 flex items-end justify-between font-tech text-[0.58rem] tracking-[0.2em] text-mute sm:text-[0.62rem]">
+              <div className="mb-2 flex items-end justify-between font-tech text-[0.66rem] tracking-[0.2em] text-mute sm:text-[0.7rem]">
                 <span>DECRYPTING CHANNEL</span>
                 <span className="tabular-nums text-neon" aria-hidden="true">
                   {String(progress).padStart(3, '0')}%
@@ -219,7 +220,7 @@ export function BootSequence({ onComplete, skipped }: BootSequenceProps) {
                   transition={{ duration: 0.34, ease: EASE_OUT_EXPO }}
                 />
               </div>
-              <div className="mt-2 flex justify-between font-tech text-[0.6rem] tracking-[0.18em] text-mute/60">
+              <div className="mt-2 flex justify-between font-tech text-[0.7rem] tracking-[0.18em] text-mute/75">
                 <span>NODE // GHOST-03</span>
                 <span className="hidden sm:inline">AES-256 // TUNNEL ACTIVE</span>
                 <span>BUILD 0.3.1</span>

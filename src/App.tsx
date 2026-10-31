@@ -77,7 +77,7 @@ export default function App() {
     <>
       <a
         href="#protocol"
-        className="sr-only-focusable fixed left-4 top-4 z-[300] border border-neon bg-void px-4 py-2 font-tech text-[0.6rem] tracking-[0.2em] text-neon"
+        className="sr-only-focusable fixed left-4 top-4 z-[300] border border-neon bg-void px-4 py-2 font-tech text-[0.7rem] tracking-[0.2em] text-neon"
         onClick={(e) => {
           e.preventDefault()
           navigate('protocol')
