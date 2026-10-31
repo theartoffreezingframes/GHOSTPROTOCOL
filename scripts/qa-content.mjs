@@ -126,6 +126,17 @@ try {
     portraitBases.every((base) => /^\/media\/operative-[a-z]+$/.test(base)),
   )
   check('portraits have alt text', team.operatives.every((o) => o.image.alt && o.image.alt.length > 30))
+  // Faceless-by-design: every portrait must describe an anonymous hooded figure,
+  // and no alt text may imply a visible face.
+  check(
+    'portraits describe anonymous hooded figures',
+    team.operatives.every((o) => /anonymous/i.test(o.image.alt) && /hood/i.test(o.image.alt)),
+  )
+  check(
+    'portraits never describe facial features',
+    team.operatives.every((o) => !/\b(eyes?|smiling|grin|nose|mouth|skin|cheek|jawline|hair)\b/i.test(o.image.alt)),
+  )
+  check('portrait alt text is unique', new Set(team.operatives.map((o) => o.image.alt)).size === team.operatives.length)
   const fsCheck = await import('node:fs')
   for (const operative of team.operatives) {
     for (const width of operative.image.widths) {
