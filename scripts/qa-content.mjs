@@ -12,6 +12,7 @@
 import { createServer } from 'vite'
 import { createElement as h } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
+import { existsSync } from 'node:fs'
 
 const server = await createServer({
   server: { middlewareMode: true },
@@ -337,6 +338,195 @@ try {
       .every((m) => m.debrief.overview === null && m.debrief.achievements.length === 0),
   )
 
+  // ── command palette source data ──────────────────────────────
+  // The palette builds its index from these exact arrays; assert the
+  // index can reach every required record.
+  for (const codename of ['GHOST', 'SHADOW', 'PHANTOM', 'SPECTRE', 'CIPHER', 'MAVERICK']) {
+    check(`palette target: operative ${codename}`, team.activeOperatives.some((o) => o.codename === codename))
+  }
+  for (const id of ['zerosecure-2', 'cyber-ekathon', 'blackout', 'secleaf-2026']) {
+    check(`palette target: mission ${id}`, missionsData.archive.some((m) => m.id === id))
+  }
+  for (const id of ['network', 'skills', 'operatives', 'radar', 'transmissions', 'missions', 'status', 'intel', 'arsenal', 'timeline']) {
+    check(`palette target: section ${id}`, site.nav.some((item) => item.id === id))
+  }
+
+  // ── capability matrix integrity ──────────────────────────────
+  const skills = await server.ssrLoadModule('/src/lib/skills.ts')
+  check('matrix has 11 categories', skills.skillCategories.length === 11, String(skills.skillCategories.length))
+  check('matrix has 6 columns', skills.matrixOperatives.length === 6)
+
+  // The core honesty rule. VERIFIED is only reachable from the operative's
+  // OWN declared skills; UNIT TOOLKIT is only reachable from a team-wide
+  // declaration. Neither may be produced any other way.
+  let verifiedCells = 0
+  let unitCells = 0
+  for (const operative of skills.matrixOperatives) {
+    for (const category of skills.skillCategories) {
+      const cell = skills.skillCell(operative.codename, category)
+      if (cell.state === 'VERIFIED') {
+        verifiedCells += 1
+        // Personal claim ⇒ the operative must declare the tool themselves.
+        check(
+          `matrix: ${operative.codename}/${category.id} VERIFIED requires a personal declaration`,
+          operative.skills.length > 0 &&
+            cell.tools.length > 0 &&
+            cell.tools.every((tool) =>
+              [tool.name, ...tool.aliases].some((name) =>
+                operative.skills.map((skill) => skill.toLowerCase()).includes(name.toLowerCase()),
+              ),
+            ),
+        )
+      } else if (cell.state === 'UNIT TOOLKIT') {
+        unitCells += 1
+        // Team claim ⇒ every cited tool must be team-wide, and the
+        // operative must NOT have a personal declaration (that would
+        // have produced VERIFIED instead).
+        check(
+          `matrix: ${operative.codename}/${category.id} UNIT TOOLKIT cites only team-wide tools`,
+          cell.tools.length > 0 && cell.tools.every((tool) => tool.teamWide === true),
+        )
+        check(
+          `matrix: ${operative.codename}/${category.id} UNIT TOOLKIT is not a personal claim`,
+          operative.skills.filter((skill) =>
+            cell.tools.some((tool) =>
+              [tool.name, ...tool.aliases].some((name) => name.toLowerCase() === skill.toLowerCase()),
+            ),
+          ).length === 0,
+        )
+      } else {
+        check(
+          `matrix: ${operative.codename}/${category.id} ${cell.state} cites no personal tools`,
+          cell.state === 'INFORMATION UNAVAILABLE' ? cell.tools.length === 0 : cell.tools.length === 0,
+        )
+      }
+    }
+  }
+  // With the repo's real data (skills: [] everywhere) no individual claim
+  // may exist. If this ever flips, the data changed — not the code.
+  const anyPersonalSkills = team.activeOperatives.some((o) => o.skills.length > 0)
+  check(
+    'matrix: no VERIFIED individual cells while no operative declares skills',
+    anyPersonalSkills || verifiedCells === 0,
+    `${verifiedCells} verified cells`,
+  )
+  check('matrix: unit-level tooling is surfaced', unitCells > 0, String(unitCells))
+
+  // No score, percentage, level or ranking vocabulary anywhere in the model.
+  // States must be exactly the three sanctioned labels — no 1-5 scales,
+  // percentages or proficiency tiers can sneak in as a fourth state.
+  check(
+    'matrix exposes only the four sanctioned states',
+    Object.keys(skills.skillMatrixCopy.states).length === 4 &&
+      Object.values(skills.skillMatrixCopy.states).every((label) =>
+        ['VERIFIED', 'UNIT TOOLKIT', 'NOT SPECIFIED', 'INFO UNAVAILABLE'].includes(label),
+      ),
+    JSON.stringify(skills.skillMatrixCopy.states),
+  )
+  // No cell may carry a numeric or qualitative score.
+  let scored = 0
+  for (const operative of skills.matrixOperatives) {
+    for (const category of skills.skillCategories) {
+      const cell = skills.skillCell(operative.codename, category)
+      if ('score' in cell || 'percent' in cell || 'level' in cell) scored += 1
+    }
+  }
+  check('matrix cells carry no score/percent/level fields', scored === 0, String(scored))
+
+  // Only explicitly team-wide tools may claim unit support.
+  check(
+    'arsenal: team-wide flags are boolean',
+    site.arsenalTools.every((tool) => tool.teamWide === undefined || typeof tool.teamWide === 'boolean'),
+  )
+  check(
+    'arsenal: at least one tool is declared team-wide',
+    site.arsenalTools.some((tool) => tool.teamWide === true),
+  )
+
+  // ── mission search predicates ────────────────────────────────
+  const search = await server.ssrLoadModule('/src/components/MissionSearch.tsx')
+  const all = search.filterMissions(search.EMPTY_FILTERS)
+  check('search: all four missions with no filters', all.length === 4, String(all.length))
+  check(
+    'search: COMPLETED filter',
+    search.filterMissions({ ...search.EMPTY_FILTERS, status: 'COMPLETED' }).length === 2,
+  )
+  check(
+    'search: ONGOING filter',
+    search.filterMissions({ ...search.EMPTY_FILTERS, status: 'ONGOING' }).length === 2,
+  )
+  const solo = search.filterMissions({ ...search.EMPTY_FILTERS, type: 'SOLO' })
+  check('search: SOLO filter returns exactly BLACKOUT', solo.length === 1 && solo[0].id === 'blackout')
+  check(
+    'search: BLACKOUT solo participants are GHOST only',
+    model.operativesForMission('blackout').map((o) => o.codename).join(',') === 'GHOST',
+  )
+  check(
+    'search: operative filter GHOST returns all four',
+    search.filterMissions({ ...search.EMPTY_FILTERS, operative: 'GHOST' }).length === 4,
+  )
+  check(
+    'search: operative filter CIPHER returns one',
+    search.filterMissions({ ...search.EMPTY_FILTERS, operative: 'CIPHER' }).length === 1,
+  )
+  check(
+    'search: combined GHOST + COMPLETED',
+    search.filterMissions({ ...search.EMPTY_FILTERS, operative: 'GHOST', status: 'COMPLETED' }).length === 2,
+  )
+  check(
+    'search: combined CIPHER + COMPLETED is empty',
+    search.filterMissions({ ...search.EMPTY_FILTERS, operative: 'CIPHER', status: 'COMPLETED' }).length === 0,
+  )
+  check(
+    'search: text finds BLACKOUT by name',
+    search.filterMissions({ ...search.EMPTY_FILTERS, query: 'blackout' }).length === 1,
+  )
+  check(
+    'search: text finds SECLEAF by operative',
+    search.filterMissions({ ...search.EMPTY_FILTERS, query: 'maverick' }).map((m) => m.id).join(',') === 'secleaf-2026',
+  )
+  check(
+    'search: no fifth mission can be reached',
+    all.every((mission) => ['zerosecure-2', 'cyber-ekathon', 'blackout', 'secleaf-2026'].includes(mission.id)),
+  )
+
+  // ── identity card data ───────────────────────────────────────
+  const displayIds = team.activeOperatives.map((o) => `GP-${o.number}`)
+  check('identity: six display ids', displayIds.length === 6)
+  check('identity: display ids are unique', new Set(displayIds).size === 6)
+  check(
+    'identity: ids follow GP-001 … GP-006',
+    displayIds.join(',') === 'GP-001,GP-002,GP-003,GP-004,GP-005,GP-006',
+  )
+  for (const operative of team.activeOperatives) {
+    const file = `public${operative.image.base}-${operative.image.widths[operative.image.widths.length - 1]}.webp`
+    check(`identity: portrait on disk for ${operative.codename}`, existsSync(file), file)
+  }
+
+  // Identity-carrying records must match the official names verbatim.
+  const officialNames = {
+    GHOST: 'AKSHAY RAJU OMKARAM',
+    SHADOW: 'VARUN VEERAPALLY',
+    PHANTOM: 'SREEKAR KETHA',
+    SPECTRE: 'MOHAMMAD ISMAIL KHAN',
+    CIPHER: 'SNEHITH REDDY NEMALIKONDA',
+    MAVERICK: 'DILIP KESHAV MADALA',
+  }
+  for (const operative of team.activeOperatives) {
+    check(
+      `identity: ${operative.codename} full name verbatim`,
+      operative.fullName === officialNames[operative.codename],
+      operative.fullName,
+    )
+  }
+
+  // ── section transitions ──────────────────────────────────────
+  const transitions = await server.ssrLoadModule('/src/lib/transitions.ts')
+  for (const id of ['radar', 'arsenal', 'operatives', 'missions', 'network']) {
+    check(`transition copy for #${id}`, transitions.transitionFor(id).message.length > 0)
+  }
+  check('transition has a fallback', transitions.transitionFor('nonexistent').message.length > 0)
+
   // ── brand copy ───────────────────────────────────────────────
   for (const phrase of [
     'WE ARE THE GHOSTS',
@@ -394,7 +584,7 @@ try {
   check('programming stack present', JSON.stringify(site.arsenal).includes('Python'))
   check('security stack present', JSON.stringify(site.arsenal).includes('CTF Challenges'))
   check('ai stack present', JSON.stringify(site.arsenal).includes('LLMs'))
-  check('nav has 12 entries', site.nav.length === 12, `found ${site.nav.length}`)
+  check('nav has 15 entries', site.nav.length === 15, `found ${site.nav.length}`)
   check('projects are placeholders', projectsData.projects.every((p) => p.summary === null))
   check('no invented socials', site.contact.channels.every((c) => c.href === null && c.handle === null))
   check('no invented member socials', team.operatives.every((o) => o.socials.length === 0))

@@ -94,6 +94,7 @@ export function BlackoutMission({ mission }: { mission: Mission }) {
 
       <motion.article
         id="operation-blackout"
+        data-mission-id={mission.id}
         className="relative overflow-hidden border border-neon/25 bg-black"
         initial={reduce ? false : { opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}

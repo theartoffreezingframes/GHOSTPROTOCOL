@@ -1,4 +1,4 @@
-import { useId, useState } from 'react'
+import { useCallback, useEffect, useId, useMemo, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { Archive, Check, ChevronDown, FileLock2, MapPin, Radio, ScanLine } from 'lucide-react'
 
@@ -19,13 +19,62 @@ import { Reveal } from '../components/Reveal'
 import { SectionHeading } from '../components/SectionHeading'
 import { StatusPill } from '../components/StatusPill'
 import { BlackoutMission } from './Blackout'
+import { EMPTY_FILTERS, MissionSearch, filterMissions } from '../components/MissionSearch'
+import { FOCUS_MISSIONS_EVENT } from '../lib/events'
 
 export function Missions() {
-  const completed = archiveRows.filter((m) => m.status === 'COMPLETED')
-  const live = archiveRows.filter((m) => m.status === 'ONGOING')
-  const upcoming = archiveRows.filter((m) => m.status === 'UPCOMING')
+  const [filters, setFilters] = useState(EMPTY_FILTERS)
+
+  const matched = useMemo(() => filterMissions(filters), [filters])
+  const filtering =
+    filters.query.trim() !== '' ||
+    filters.status !== 'ALL' ||
+    filters.operative !== 'ALL' ||
+    filters.type !== 'ALL'
+
+  /**
+   * Filtered views of the archive. While a query is active everything
+   * renders as a standard record row so nothing matching is hidden
+   * inside the centrepiece treatment.
+   */
+  const completed = useMemo(
+    () =>
+      matched.filter(
+        (m) => m.status === 'COMPLETED' && (filtering || m !== featureMission),
+      ),
+    [matched, filtering],
+  )
+  const live = useMemo(
+    () => matched.filter((m) => m.status === 'ONGOING' && (filtering || m !== featureMission)),
+    [matched, filtering],
+  )
+  // Check the *unfiltered* match set, not `live` (which deliberately
+  // excludes the centrepiece).
+  const showFeature = !filtering && matched.some((m) => m.id === featureMission.id)
+
   const archivedTotal = String(statusCounts.completed).padStart(2, '0')
   const liveTotal = String(statusCounts.active).padStart(2, '0')
+
+  /** Command palette → open this section already scoped to one mission. */
+  const focusFromEvent = useCallback((event: Event) => {
+    const detail = (event as CustomEvent<{ missionId?: string }>).detail
+    const missionId = detail?.missionId
+    if (!missionId) {
+      setFilters(EMPTY_FILTERS)
+      return
+    }
+    const mission = archiveRows.find((row) => row.id === missionId) ?? featureMission
+    setFilters({
+      ...EMPTY_FILTERS,
+      query: mission.title,
+    })
+  }, [])
+
+  useEffect(() => {
+    const handler = (event: Event) => focusFromEvent(event)
+    window.addEventListener(FOCUS_MISSIONS_EVENT, handler)
+    return () => window.removeEventListener(FOCUS_MISSIONS_EVENT, handler)
+  }, [focusFromEvent])
 
   return (
     <section
@@ -56,6 +105,8 @@ export function Missions() {
           </Reveal>
         </SectionHeading>
 
+        <MissionSearch filters={filters} onChange={setFilters} matched={matched.length} />
+
         {/* archived missions — alternating editorial rows */}
         {completed.length > 0 && (
           <div className="mt-14 space-y-6 sm:mt-20 sm:space-y-8">
@@ -66,7 +117,7 @@ export function Missions() {
         )}
 
         {/* live operations — the centrepiece carries the classified treatment */}
-        {(live.length > 0 || upcoming.length > 0) && (
+        {showFeature && (
           <div className="mt-16 sm:mt-24">
             <div className="mb-5 flex items-center gap-3">
               <span className="relative flex h-1.5 w-1.5" aria-hidden="true">
@@ -80,13 +131,33 @@ export function Missions() {
         )}
 
         {/* additional live operations — briefing-styled archive rows */}
-        {live.filter((mission) => mission !== featureMission).length > 0 && (
-          <div className="mt-8 space-y-6 sm:mt-10 sm:space-y-8">
+        {live.filter((mission) => mission !== featureMission || filtering).length > 0 && (
+          <div className={showFeature ? 'mt-8 space-y-6 sm:mt-10 sm:space-y-8' : 'mt-14 space-y-6 sm:mt-20 sm:space-y-8'}>
             {live
-              .filter((mission) => mission !== featureMission)
+              .filter((mission) => mission !== featureMission || filtering)
               .map((mission, index) => (
                 <MissionRecord key={mission.number} mission={mission} index={index} live />
               ))}
+          </div>
+        )}
+
+        {/* empty state — filters are the only thing that can produce it */}
+        {matched.length === 0 && (
+          <div className="mt-14 border border-dashed border-line-soft px-5 py-12 text-center">
+            <p className="font-tech text-[0.66rem] tracking-[0.22em] text-bone/70">
+              NO OPERATION MATCHES THESE FILTERS
+            </p>
+            <p className="mx-auto mt-2 max-w-md text-[0.72rem] leading-relaxed text-mute/55">
+              The archive holds exactly four operations. Clear the filters to see all of them, or
+              try an operative codename such as GHOST.
+            </p>
+            <button
+              type="button"
+              onClick={() => setFilters(EMPTY_FILTERS)}
+              className="font-tech mt-4 border border-neon/40 px-3 py-1.5 text-[0.5rem] tracking-[0.18em] text-neon transition-colors hover:bg-neon/10"
+            >
+              CLEAR ALL FILTERS
+            </button>
           </div>
         )}
       </div>
@@ -100,12 +171,15 @@ function MissionRecord({ mission, index, live = false }: { mission: Mission; ind
   const id = useId()
   const reversed = index % 2 === 1
   const status = statusDisplay[mission.status]
+  // Participation comes from the shared model — never typed on the card.
+  const participants = operativesForMission(mission.id)
   const summaryFallback = status.active
     ? 'Operation is live. Debrief fields stay sealed until the unit clears them for release.'
     : 'Field record declassified as complete. Detailed debrief fields are open for the operative unit to publish.'
 
   return (
     <motion.article
+      data-mission-id={mission.id}
       className={cn(
         'group relative overflow-hidden border bg-card/40 transition-colors duration-500',
         live ? 'border-neon/25 hover:border-neon/45' : 'border-line-soft hover:border-neon/25',
@@ -259,9 +333,14 @@ function MissionRecord({ mission, index, live = false }: { mission: Mission; ind
 
       {/* footer metadata strip */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line-soft bg-void/40 px-5 py-2.5 sm:px-7">
-        <span className="font-tech flex items-center gap-2 text-[0.66rem] tracking-[0.2em] text-mute/75">
+        <span className="font-tech flex flex-wrap items-center gap-2 text-[0.66rem] tracking-[0.2em] text-mute/75">
           <ScanLine size={9} aria-hidden="true" />
           FILE {mission.number} // {mission.codename}
+          <span className="text-mute/30" aria-hidden="true">·</span>
+          <span>
+            <span className="text-mute/45">ASSIGNED // </span>
+            <span className="text-bone/85">{participants.map((p) => p.codename).join(' · ')}</span>
+          </span>
         </span>
         <span className="font-tech flex items-center gap-2 text-[0.66rem] tracking-[0.2em] text-mute/75">
           <FileLock2 size={9} aria-hidden="true" />

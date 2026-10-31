@@ -33,7 +33,8 @@ neon accent, oversized display type, technical HUD chrome, restrained motion.
 | 01 | The Protocol | `#protocol` | Editorial asymmetry, philosophy rail, unit stats |
 | 02 | Operative Database | `#operatives` | Six faceless dossiers + mission history + dossier access sequence |
 | 03 | Operative Network | `#network` | SVG participation graph, 10 nodes, 13 derived edges |
-| 04 | Classified Operations | `#missions` | Four operations with an expandable debrief archive |
+| 03.5 | Capability Matrix | `#skills` | 11 skill rows × 6 operatives, derived from documented tooling only |
+| 04 | Classified Operations | `#missions` | Four operations, expandable debriefs, search + four filters |
 | 05 | Encrypted Transmissions | `#transmissions` | Fictional terminal feed, five expandable intercepts |
 | 06 | Engineering Lab | `#lab` | Open bays only — no invented builds |
 | 07 | Technical Arsenal | `#arsenal` | Filterable index (6 categories), search, capability matrix |
@@ -41,11 +42,20 @@ neon accent, oversized display type, technical HUD chrome, restrained motion.
 | 09 | Protocol Timeline | `#timeline` | Five milestones, expandable, undated where unknown |
 | 10 | Record of Operations | `#record` | Verified-only operation record |
 | 11 | Redacted Files | `#intel` | Three classified cards with click-to-reveal bars |
+| 11.5 | Personnel Cards | `#identity` | Six ID cards with a 1600 × 1000 PNG export |
 | — | System Status | `#status` | Four tactical counters computed from the data model |
 | 12 | Establish Connection | `#contact` | Handshake terminal, channels, closing signature |
 
 The header shows five primary links plus a **SECTIONS** menu; the mobile sheet lists
 all twelve. Nothing is reachable only by scroll.
+
+**Command palette** — `Ctrl`/`Cmd` + `K`, or the SEARCH control in the header. It indexes
+the same operative records, the same four operations and the same `nav` array as the rest
+of the site, so its results cannot drift from the page. Arrow keys move, `Enter` acts,
+`Escape` closes, focus returns to wherever you started. It never opens while a field has
+focus, and it does not touch any other shortcut. Typing `open ghost`, `show radar` or
+`search missions` works because the leading verb is treated as a command rather than a
+search term.
 
 **Shared data model**
 
@@ -58,6 +68,14 @@ used as a key, and no relationship is stored twice.
 
 Exactly 6 operatives, 4 operations, 13 assignments, 2 completed, 2 ongoing — with
 BLACKOUT a solo assignment held by GHOST alone. `npm run qa` asserts all of it.
+
+The capability matrix adds a second, separate axis: `arsenalTools[].teamWide` marks the
+tooling this site declares for the unit, while `operatives[].skills` is per-person
+evidence. Those are deliberately different fields. A team declaration can never produce
+a `VERIFIED` cell for an individual — it produces `UNIT TOOLKIT` instead. Every one of the
+six `skills` arrays is currently empty, so the matrix shows no individually verified
+skill, and the section says so on the page. Filling in a `skills` array is the only thing
+that changes it.
 
 **Animation & interaction**
 
@@ -377,7 +395,7 @@ element jumped past by a fast scroll may never intersect at all. Therefore:
 npm run qa
 ```
 
-Server-renders every section and asserts 244 requirements: all six identities, the six
+Server-renders every section and asserts 407 requirements: all six identities, the six
 profile descriptions reproduced verbatim, unique portrait files present on disk, the four
 missions with their exact statuses, the exact mission-participation matrix (including
 BLACKOUT being GHOST-only and solo), required copy, forbidden strings (including
@@ -387,6 +405,13 @@ manifest validity, and SEO metadata. It also checks the derived model — 6 oper
 operation — that no mission ships a fabricated debrief, that no timeline entry invents a
 date, that redactions contain no credential-like strings, and that Arsenal tools carry no
 proficiency levels.
+
+The advanced layer adds assertions that the palette can reach every operative, operation
+and section; that a `VERIFIED` matrix cell is only reachable from that operative's own
+declared skills and a `UNIT TOOLKIT` cell only from a team-wide flag; that mission search
+returns the right sets for every status / operative / type / combined filter and cannot
+reach a fifth mission; that BLACKOUT reports GHOST and nobody else; that the six display
+IDs are `GP-001`…`GP-006`; and that every portrait the card export needs exists on disk.
 
 ---
 
@@ -403,6 +428,9 @@ Several surfaces look like live systems. They are not, and the copy says so on t
 | Redacted Files | Invented placeholder text. No real credentials, keys, tokens or personal data appear anywhere in them. |
 | Timeline | Milestones only. Every date renders `DATE UNDISCLOSED` because none is verified. |
 | Interface audio | Off by default, never autoplays, generated with the Web Audio API (no files, no copyrighted recordings), low gain, one-shot cues. The site works fully silent. |
+| Capability matrix | Documented tooling only. `UNIT TOOLKIT` is a team-level statement, explicitly not a claim about one person. No score, percentage, level or ranking exists in the model. |
+| Personnel cards | `GP-001`–`GP-006` are display identifiers. The card and the exported PNG both state they are not credentials, clearances or certifications. |
+| Section transitions | A 620 ms scan line and one status line. Navigation is never delayed, nothing is blocked, and reduced motion removes the effect entirely. |
 
 Easter eggs (`ghost://override`, the Konami sequence, a five-tap emblem) are additive: they
 never intercept keystrokes inside inputs, never hijack browser shortcuts, and never block

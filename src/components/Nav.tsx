@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { AnimatePresence, motion, useReducedMotion, useScroll, useSpring } from 'motion/react'
 import { ChevronDown, Menu, X } from 'lucide-react'
 
@@ -13,9 +13,11 @@ type NavProps = {
   onNavigate: (id: string) => void
   /** Hidden until the boot sequence releases the page. */
   ready: boolean
+  /** The command palette (trigger + dialog), owned by App so it can navigate. */
+  commandPalette?: ReactNode
 }
 
-export function Nav({ onNavigate, ready }: NavProps) {
+export function Nav({ onNavigate, ready, commandPalette }: NavProps) {
   const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [active, setActive] = useState<string>('')
@@ -175,7 +177,7 @@ export function Nav({ onNavigate, ready }: NavProps) {
                   aria-expanded={moreOpen}
                   {...(moreOpen ? { 'aria-controls': 'more-sections' } : {})}
                   className={cn(
-                    'group relative flex items-center gap-1 px-1.5 py-2 font-tech text-[0.6rem] tracking-[0.1em] transition-colors duration-300 xl:gap-1.5 xl:px-2.5 xl:text-[0.66rem] xl:tracking-[0.14em]',
+                    'group relative flex items-center gap-1 px-1.5 py-2 font-tech text-[0.6rem] tracking-[0.1em] transition-colors duration-300 xl:gap-1.5 xl:px-2 xl:text-[0.66rem] xl:tracking-[0.13em]',
                     secondaryNav.some((item) => item.id === active)
                       ? 'text-neon'
                       : 'text-mute hover:text-bone',
@@ -235,6 +237,8 @@ export function Nav({ onNavigate, ready }: NavProps) {
             </nav>
 
             <div className="flex items-center gap-2">
+              {commandPalette}
+
               <AudioToggle className="hidden sm:flex" />
 
               <button

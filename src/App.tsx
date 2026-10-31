@@ -2,21 +2,25 @@ import { useCallback, useEffect, useState } from 'react'
 import { useReducedMotion } from 'motion/react'
 
 import { BootSequence, BOOT_STORAGE_KEY } from './components/BootSequence'
+import { CommandPalette } from './components/CommandPalette'
 import { CustomCursor } from './components/CustomCursor'
 import { DossierProvider } from './components/DossierProvider'
 import { EasterEggs } from './components/EasterEggs'
 import { Footer } from './components/Footer'
 import { Nav } from './components/Nav'
+import { SectionTransitionOverlay, useSectionTransition } from './components/SectionTransition'
 import { About } from './sections/About'
 import { Arsenal } from './sections/Arsenal'
 import { Contact } from './sections/Contact'
 import { Hero } from './sections/Hero'
+import { IdentityCards } from './components/IdentityCard'
 import { Missions } from './sections/Missions'
 import { NetworkMap } from './sections/NetworkMap'
 import { Operatives } from './sections/Operatives'
 import { Projects } from './sections/Projects'
 import { RedactedFiles } from './sections/RedactedFiles'
 import { Record } from './sections/Record'
+import { SkillsMatrix } from './sections/SkillsMatrix'
 import { SystemStatus } from './sections/SystemStatus'
 import { ThreatRadar } from './sections/ThreatRadar'
 import { Timeline } from './sections/Timeline'
@@ -32,6 +36,7 @@ function readBootFlag() {
 
 export default function App() {
   const reduce = useReducedMotion()
+  const { play: playTransition, activeId, transition } = useSectionTransition()
   const [booted, setBooted] = useState(false)
   const [skipBoot, setSkipBoot] = useState(false)
   const [checked, setChecked] = useState(false)
@@ -61,9 +66,15 @@ export default function App() {
     document.body.classList.remove('is-locked')
   }, [])
 
-  /** Single easing owner for in-page navigation. */
+  /**
+   * Single easing owner for in-page navigation.
+   *
+   * The transition overlay is decoration laid over an already-started
+   * scroll — it never gates navigation and adds no waiting time.
+   */
   const navigate = useCallback(
     (id: string) => {
+      playTransition(id)
       if (id === 'top') {
         window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' })
         return
@@ -76,8 +87,10 @@ export default function App() {
       el.setAttribute('tabindex', '-1')
       window.setTimeout(() => el.focus({ preventScroll: true }), reduce ? 0 : 700)
     },
-    [reduce],
+    [playTransition, reduce],
   )
+
+  const openMissions = useCallback(() => navigate('missions'), [navigate])
 
   const ready = checked && (booted || skipBoot || Boolean(reduce))
 
@@ -100,13 +113,20 @@ export default function App() {
         <BootSequence skipped={skipBoot} onComplete={finishBoot} />
       )}
 
-      <Nav ready={ready} onNavigate={navigate} />
+      <SectionTransitionOverlay transition={transition} activeKey={activeId} />
+
+      <Nav
+        ready={ready}
+        onNavigate={navigate}
+        commandPalette={<CommandPalette onNavigate={navigate} onOpenMissions={openMissions} />}
+      />
 
       <main id="main" className="relative">
         <Hero ready={ready} onNavigate={navigate} />
         <About />
         <Operatives />
         <NetworkMap />
+        <SkillsMatrix />
         <Missions />
         <Transmissions />
         <Projects />
@@ -115,6 +135,7 @@ export default function App() {
         <Timeline />
         <Record />
         <RedactedFiles />
+        <IdentityCards />
         <SystemStatus />
         <Contact />
       </main>

@@ -39,15 +39,18 @@ export const nav: NavItem[] = [
   { id: 'protocol', index: '01', label: 'The Protocol', short: 'Protocol', primary: true },
   { id: 'operatives', index: '02', label: 'Operatives', short: 'Operatives', primary: true },
   { id: 'network', index: '03', label: 'Operative Network', short: 'Network', primary: true },
-  { id: 'missions', index: '04', label: 'Operations', short: 'Ops', primary: true },
-  { id: 'transmissions', index: '05', label: 'Transmissions', short: 'Signals' },
-  { id: 'lab', index: '06', label: 'Engineering Lab', short: 'Lab' },
-  { id: 'arsenal', index: '07', label: 'Arsenal', short: 'Arsenal', primary: true },
-  { id: 'radar', index: '08', label: 'Threat Radar', short: 'Radar' },
-  { id: 'timeline', index: '09', label: 'Timeline', short: 'Timeline' },
-  { id: 'record', index: '10', label: 'Record', short: 'Record' },
-  { id: 'intel', index: '11', label: 'Redacted Files', short: 'Intel' },
-  { id: 'contact', index: '12', label: 'Connection', short: 'Connect', primary: true },
+  { id: 'skills', index: '04', label: 'Capability Matrix', short: 'Skills' },
+  { id: 'missions', index: '05', label: 'Operations', short: 'Ops', primary: true },
+  { id: 'transmissions', index: '06', label: 'Transmissions', short: 'Signals' },
+  { id: 'lab', index: '07', label: 'Engineering Lab', short: 'Lab' },
+  { id: 'arsenal', index: '08', label: 'Arsenal', short: 'Arsenal' },
+  { id: 'radar', index: '09', label: 'Threat Radar', short: 'Radar' },
+  { id: 'timeline', index: '10', label: 'Timeline', short: 'Timeline' },
+  { id: 'record', index: '11', label: 'Record', short: 'Record' },
+  { id: 'intel', index: '12', label: 'Redacted Files', short: 'Intel' },
+  { id: 'identity', index: '13', label: 'Personnel Cards', short: 'ID Cards' },
+  { id: 'status', index: '14', label: 'System Status', short: 'Status' },
+  { id: 'contact', index: '15', label: 'Connection', short: 'Connect', primary: true },
 ]
 
 export const primaryNav = nav.filter((item) => item.primary)
@@ -194,6 +197,15 @@ export type ArsenalTool = {
   aliases: string[]
   description: string | null
   docs: string | null
+  /**
+   * True when this site declares the tool as part of the unit's toolkit.
+   * It is a TEAM-level statement and is never evidence about one person.
+   *
+   * Per-operative evidence lives on the operative record (`skills` in
+   * src/data/team.ts); the capability matrix only marks an individual
+   * VERIFIED when that operative declares the tool themselves.
+   */
+  teamWide?: boolean
 }
 
 export const arsenalGroups: { id: ArsenalGroupId; index: string; label: string; note: string }[] = [
@@ -207,41 +219,41 @@ export const arsenalGroups: { id: ArsenalGroupId; index: string; label: string; 
 
 export const arsenalTools: ArsenalTool[] = [
   // programming
-  { id: 'python', name: 'Python', group: 'programming', aliases: ['py'], description: null, docs: null },
-  { id: 'c', name: 'C', group: 'programming', aliases: [], description: null, docs: null },
-  { id: 'cpp', name: 'C++', group: 'programming', aliases: ['cplusplus'], description: null, docs: null },
-  { id: 'java', name: 'Java', group: 'programming', aliases: [], description: null, docs: null },
-  { id: 'javascript', name: 'JavaScript', group: 'programming', aliases: ['js'], description: null, docs: null },
-  { id: 'typescript', name: 'TypeScript', group: 'programming', aliases: ['ts'], description: null, docs: null },
-  { id: 'html', name: 'HTML', group: 'programming', aliases: [], description: null, docs: null },
-  { id: 'css', name: 'CSS', group: 'programming', aliases: [], description: null, docs: null },
+  { id: 'python', name: 'Python', group: 'programming', aliases: ['py'], description: null, docs: null, teamWide: true },
+  { id: 'c', name: 'C', group: 'programming', aliases: [], description: null, docs: null, teamWide: true },
+  { id: 'cpp', name: 'C++', group: 'programming', aliases: ['cplusplus'], description: null, docs: null, teamWide: true },
+  { id: 'java', name: 'Java', group: 'programming', aliases: [], description: null, docs: null, teamWide: true },
+  { id: 'javascript', name: 'JavaScript', group: 'programming', aliases: ['js'], description: null, docs: null, teamWide: true },
+  { id: 'typescript', name: 'TypeScript', group: 'programming', aliases: ['ts'], description: null, docs: null, teamWide: true },
+  { id: 'html', name: 'HTML', group: 'programming', aliases: [], description: null, docs: null, teamWide: true },
+  { id: 'css', name: 'CSS', group: 'programming', aliases: [], description: null, docs: null, teamWide: true },
 
   // security
-  { id: 'linux', name: 'Linux', group: 'security', aliases: ['unix'], description: null, docs: null },
-  { id: 'networking', name: 'Networking', group: 'security', aliases: ['tcp', 'ip'], description: null, docs: null },
-  { id: 'web-security', name: 'Web Security', group: 'security', aliases: ['appsec'], description: null, docs: null },
-  { id: 'ctf', name: 'CTF Challenges', group: 'security', aliases: ['capture the flag'], description: null, docs: null },
-  { id: 'security-fundamentals', name: 'Security Fundamentals', group: 'security', aliases: [], description: null, docs: null },
+  { id: 'linux', name: 'Linux', group: 'security', aliases: ['unix'], description: null, docs: null, teamWide: true },
+  { id: 'networking', name: 'Networking', group: 'security', aliases: ['tcp', 'ip'], description: null, docs: null, teamWide: true },
+  { id: 'web-security', name: 'Web Security', group: 'security', aliases: ['appsec'], description: null, docs: null, teamWide: true },
+  { id: 'ctf', name: 'CTF Challenges', group: 'security', aliases: ['capture the flag'], description: null, docs: null, teamWide: true },
+  { id: 'security-fundamentals', name: 'Security Fundamentals', group: 'security', aliases: [], description: null, docs: null, teamWide: true },
 
   // ai
-  { id: 'ai', name: 'Artificial Intelligence', group: 'ai', aliases: ['ai'], description: null, docs: null },
-  { id: 'ml', name: 'Machine Learning', group: 'ai', aliases: ['ml'], description: null, docs: null },
-  { id: 'llm', name: 'LLMs', group: 'ai', aliases: ['large language models'], description: null, docs: null },
-  { id: 'ai-dev', name: 'AI-Powered Development', group: 'ai', aliases: ['assisted coding'], description: null, docs: null },
+  { id: 'ai', name: 'Artificial Intelligence', group: 'ai', aliases: ['ai'], description: null, docs: null, teamWide: true },
+  { id: 'ml', name: 'Machine Learning', group: 'ai', aliases: ['ml'], description: null, docs: null, teamWide: true },
+  { id: 'llm', name: 'LLMs', group: 'ai', aliases: ['large language models'], description: null, docs: null, teamWide: true },
+  { id: 'ai-dev', name: 'AI-Powered Development', group: 'ai', aliases: ['assisted coding'], description: null, docs: null, teamWide: true },
 
   // frameworks (already on site: React, Node.js)
-  { id: 'react', name: 'React', group: 'frameworks', aliases: ['reactjs'], description: null, docs: null },
-  { id: 'node', name: 'Node.js', group: 'frameworks', aliases: ['node', 'nodejs'], description: null, docs: null },
-  { id: 'vite', name: 'Vite', group: 'frameworks', aliases: ['build'], description: null, docs: null },
-  { id: 'tailwind', name: 'Tailwind CSS', group: 'frameworks', aliases: ['tailwind'], description: null, docs: null },
+  { id: 'react', name: 'React', group: 'frameworks', aliases: ['reactjs'], description: null, docs: null, teamWide: true },
+  { id: 'node', name: 'Node.js', group: 'frameworks', aliases: ['node', 'nodejs'], description: null, docs: null, teamWide: true },
+  { id: 'vite', name: 'Vite', group: 'frameworks', aliases: ['build'], description: null, docs: null, teamWide: true },
+  { id: 'tailwind', name: 'Tailwind CSS', group: 'frameworks', aliases: ['tailwind'], description: null, docs: null, teamWide: true },
 
   // tools (present in this repo's own toolchain)
-  { id: 'git', name: 'Git', group: 'tools', aliases: ['version control'], description: null, docs: null },
+  { id: 'git', name: 'Git', group: 'tools', aliases: ['version control'], description: null, docs: null, teamWide: true },
   { id: 'vitest', name: 'TypeScript Compiler', group: 'tools', aliases: ['tsc', 'typecheck'], description: null, docs: null },
-  { id: 'sharp', name: 'Sharp', group: 'tools', aliases: ['image pipeline'], description: null, docs: null },
+  { id: 'sharp', name: 'Sharp', group: 'tools', aliases: ['image pipeline'], description: null, docs: null, teamWide: true },
 
   // platforms
-  { id: 'browser', name: 'Web Browsers', group: 'platforms', aliases: ['web'], description: null, docs: null },
+  { id: 'browser', name: 'Web Browsers', group: 'platforms', aliases: ['web'], description: null, docs: null, teamWide: true },
   { id: 'vercel', name: 'Vercel', group: 'platforms', aliases: ['deploy', 'hosting'], description: null, docs: null },
 ]
 
