@@ -208,6 +208,15 @@ try {
   check('lang attribute', indexHtml.includes('lang="en"'))
   check('favicon linked', indexHtml.includes('favicon.svg'))
   check('manifest linked', indexHtml.includes('site.webmanifest'))
+  const manifest = JSON.parse(await readFile(new URL('../public/site.webmanifest', import.meta.url), 'utf8'))
+  check('manifest file exists + valid', typeof manifest.name === 'string' && manifest.name.length > 0)
+  check('manifest has icons', Array.isArray(manifest.icons) && manifest.icons.length > 0)
+  check('manifest start_url', manifest.start_url === '/')
+  check('manifest theme colour matches palette', manifest.theme_color === '#050706')
+  const fsMod = await import('node:fs')
+  for (const rel of ['../public/favicon.svg', '../public/favicon-32.png', '../public/apple-touch-icon.png', '../public/og-image.jpg']) {
+    check(`asset exists: ${rel.replace('../public/', '')}`, fsMod.existsSync(new URL(rel, import.meta.url)))
+  }
   check('json-ld present', indexHtml.includes('application/ld+json'))
   check('theme-color set', indexHtml.includes('theme-color'))
 } finally {
